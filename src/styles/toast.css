@@ -1,0 +1,156 @@
+/* ============================================================
+   ScoreToast — arcade popup on every rally impact
+   ============================================================ */
+
+.toast-container {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ---- Individual toast ---- */
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px 14px 22px;
+  border-radius: 4px;
+  font-family: var(--font-pixel, monospace);
+  letter-spacing: 1px;
+  white-space: nowrap;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.15),
+    0 8px 32px rgba(0, 0, 0, 0.7),
+    0 0 60px rgba(0, 0, 0, 0.5);
+  animation: toastFly 2.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform-origin: center;
+}
+
+/* Team A — cyan / ice theme */
+.toast--a {
+  background: linear-gradient(135deg,
+    rgba(0, 50, 70, 0.92) 0%,
+    rgba(5, 25, 45, 0.95) 60%,
+    rgba(0, 30, 55, 0.88) 100%);
+  border: 1.5px solid rgba(82, 224, 232, 0.6);
+  border-left-width: 5px;
+  flex-direction: row;
+}
+
+/* Team B — pink / rose theme */
+.toast--b {
+  background: linear-gradient(135deg,
+    rgba(60, 0, 40, 0.92) 0%,
+    rgba(30, 0, 25, 0.95) 60%,
+    rgba(50, 0, 35, 0.88) 100%);
+  border: 1.5px solid rgba(255, 105, 180, 0.6);
+  border-right-width: 5px;
+  flex-direction: row-reverse;
+}
+
+/* ---- Content pieces ---- */
+.toast__team {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  opacity: 0.7;
+}
+.toast--a .toast__team { color: #82e8ee; }
+.toast--b .toast__team { color: #ff9bd0; }
+
+.toast__scorer {
+  font-size: 22px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow:
+    0 0 12px rgba(255, 255, 255, 0.5),
+    0 0 30px rgba(255, 255, 255, 0.2),
+    0 3px 0 rgba(0, 0, 0, 0.5);
+}
+
+.toast__divider {
+  font-size: 20px;
+  opacity: 0.4;
+  color: #fff;
+  padding: 0 2px;
+}
+
+.toast__type {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  padding: 3px 10px;
+  border-radius: 3px;
+}
+
+/* Point type pill colours */
+.toast--a.toast--kill .toast__type,
+.toast--b.toast--kill .toast__type {
+  color: #ff9b8a;
+  background: rgba(255, 126, 107, 0.2);
+}
+.toast--a.toast--block .toast__type,
+.toast--b.toast--block .toast__type {
+  color: #ffd83d;
+  background: rgba(255, 216, 61, 0.2);
+}
+.toast--a.toast--ace .toast__type,
+.toast--b.toast--ace .toast__type {
+  color: #82e8ee;
+  background: rgba(82, 224, 232, 0.2);
+}
+.toast--a.toast--attack_err .toast__type,
+.toast--b.toast--attack_err .toast__type {
+  color: #ff9bd0;
+  background: rgba(255, 105, 180, 0.2);
+}
+.toast--a.toast--service_err .toast__type,
+.toast--b.toast--service_err .toast__type {
+  color: #c8a4ff;
+  background: rgba(180, 130, 240, 0.2);
+}
+
+.toast__bang {
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+}
+.toast--a .toast__bang { color: #ffd83d; }
+.toast--b .toast__bang { color: #ffd83d; }
+
+/* ---- Animations ---- */
+
+/* Slide in from side, hold, fade out */
+@keyframes toastFly {
+  0%   { opacity: 0; transform: translateX(-120px) scale(0.7); }
+  12%  { opacity: 1; transform: translateX(0)    scale(1.08); }
+  20%  { transform: translateX(0)   scale(1); }
+  75%  { opacity: 1; transform: translateX(0) scale(1); }
+  100% { opacity: 0; transform: translateX(40px) scale(0.85); }
+}
+
+/* B slide from opposite direction */
+.toast--b {
+  animation-name: toastFlyB;
+}
+@keyframes toastFlyB {
+  0%   { opacity: 0; transform: translateX(120px) scale(0.7); }
+  12%  { opacity: 1; transform: translateX(0)   scale(1.08); }
+  20%  { transform: translateX(0)  scale(1); }
+  75%  { opacity: 1; transform: translateX(0) scale(1); }
+  100% { opacity: 0; transform: translateX(-40px) scale(0.85); }
+}
+
+/* Second toast (stacked) — scale down slightly */
+.toast-container > *:nth-child(2) {
+  transform-origin: center;
+  animation-duration: 2.2s;
+}

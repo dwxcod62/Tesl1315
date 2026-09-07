@@ -1,0 +1,1006 @@
+/* ================================================================
+   BUILD A COMPETITIVE VOLLEYBALL CLUB
+   8-bit volleyball game / presentation
+   ================================================================ */
+
+/* ---------- App root + stage ---------- */
+
+.app-root {
+  width: 100vw;
+  height: 100svh;
+  overflow: hidden;
+  position: relative;
+}
+
+.stage {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100svh;
+  padding: clamp(14px, 1.8vh, 24px) clamp(24px, 2.4vw, 48px) clamp(12px, 1.6vh, 22px);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: clamp(10px, 1.4vh, 16px);
+}
+
+/* Phase-based fade-in (start -> match) */
+.app-root--start .stage .panel,
+.app-root--start .stage .app-footer,
+.app-root--start .stage .panels__scoreboard-wrap {
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 600ms ease, transform 600ms ease;
+}
+
+.app-root--match .stage .panel,
+.app-root--match .stage .app-footer,
+.app-root--match .stage .panels__scoreboard-wrap {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition: opacity 600ms ease 150ms, transform 600ms ease 150ms;
+}
+
+/* ---------- Header ---------- */
+
+.app-header {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2px, 0.4vh, 6px);
+}
+
+.top-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.top-label__dot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.hero-title {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: clamp(16px, 2vw, 30px);
+  line-height: 1.2;
+  letter-spacing: 1px;
+  color: var(--text);
+}
+
+.hero-title__accent {
+  display: inline-block;
+  color: var(--accent);
+}
+
+.hero-subtitle {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: clamp(11px, 0.95vw, 14px);
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--text-muted);
+  max-width: 70ch;
+}
+
+/* ---------- Panels row (Reasons | Scoreboard | Benefits) ---------- */
+
+.panels {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: stretch;
+  gap: clamp(14px, 1.8vw, 24px);
+  min-height: 0;
+  /* Keep panels compact so the arena stays visually central.
+     Cap to ~38% of viewport height. */
+  max-height: clamp(220px, 36vh, 320px);
+}
+
+.panels__scoreboard-wrap {
+  display: flex;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: clamp(10px, 1.2vh, 14px) clamp(12px, 1.1vw, 16px);
+  min-height: 0;
+}
+
+.panel__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel__head-arrow {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: var(--pixel-black);
+  font-size: 10px;
+  font-family: var(--font-pixel);
+  border-radius: 3px;
+}
+
+.panel__head-title {
+  font-family: var(--font-pixel);
+  font-size: clamp(11px, 1.05vw, 15px);
+  letter-spacing: 1.5px;
+  color: var(--text);
+  flex: 1;
+}
+
+.panel__head-tag {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 3px 7px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.panel__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+}
+
+/* ---------- Item cards ---------- */
+
+.item {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: clamp(8px, 0.8vw, 12px);
+  padding: 6px clamp(8px, 0.8vw, 12px);
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  transition: border-color 0.15s ease;
+}
+
+.item:hover {
+  border-color: var(--border-strong);
+}
+
+.item__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: clamp(30px, 2.4vw, 38px);
+  height: 22px;
+  padding: 0 6px;
+  background: var(--accent);
+  color: var(--pixel-black);
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.item__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: var(--accent);
+}
+
+.item__text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.item__title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: clamp(11px, 0.95vw, 14px);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: var(--text);
+}
+
+.item__desc {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: clamp(10px, 0.85vw, 12.5px);
+  line-height: 1.4;
+  color: var(--text-muted);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* ---------- Footer (3 tagline chips) ---------- */
+
+.app-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 1vw, 14px);
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.tagline-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-pixel);
+  font-size: clamp(9px, 0.85vw, 12px);
+  letter-spacing: 1.5px;
+  color: var(--accent);
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 216, 61, 0.3);
+  border-radius: 4px;
+  background: rgba(255, 216, 61, 0.04);
+  text-transform: uppercase;
+}
+
+.tagline-chip__dot {
+  width: 5px;
+  height: 5px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.tagline-chip--secondary {
+  color: var(--coral);
+  border-color: rgba(255, 138, 107, 0.3);
+  background: rgba(255, 138, 107, 0.04);
+}
+.tagline-chip--secondary .tagline-chip__dot {
+  background: var(--coral);
+}
+
+/* ================================================================
+   SCOREBOARD — retro arcade HUD
+   ================================================================ */
+
+/* Scoreboard styles are in src/styles/scoreboard.css */
+
+/* ================================================================
+   START SCREEN overlay
+   ================================================================ */
+
+.start-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: startFadeIn 700ms ease both;
+}
+
+@keyframes startFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.start-screen__veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at center, rgba(20,16,43,0.55) 0%, rgba(10,7,28,0.85) 80%);
+  backdrop-filter: blur(1px);
+}
+
+.start-screen__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(14px, 2vh, 22px);
+  text-align: center;
+  padding: 24px;
+  max-width: min(640px, 90vw);
+}
+
+.start-screen__crest {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--accent);
+}
+
+.crest__ball {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 30%, #ffffff 0%, #f4ecd0 40%, #d9c98a 100%);
+  box-shadow:
+    0 0 12px rgba(255, 240, 180, 0.4),
+    inset 0 0 0 2px rgba(180, 150, 60, 0.4);
+  image-rendering: pixelated;
+  animation: crestBall 2.6s ease-in-out infinite;
+}
+
+.crest__net {
+  display: inline-block;
+  width: 60px;
+  height: 4px;
+  background: var(--accent);
+  opacity: 0.6;
+}
+
+.crest__label {
+  font-family: var(--font-pixel);
+  font-size: clamp(9px, 0.85vw, 11px);
+  letter-spacing: 2px;
+  color: var(--text-muted);
+}
+
+@keyframes crestBall {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50%      { transform: translateY(-6px) rotate(6deg); }
+}
+
+.start-screen__title {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: clamp(20px, 3vw, 36px);
+  line-height: 1.35;
+  letter-spacing: 2px;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.start-screen__title span:nth-child(2) {
+  color: var(--accent);
+}
+
+.start-screen__sub {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: clamp(13px, 1.2vw, 16px);
+  color: var(--text-muted);
+  max-width: 50ch;
+}
+
+.start-btn {
+  appearance: none;
+  border: 2px solid var(--accent);
+  background: rgba(255, 216, 61, 0.08);
+  color: var(--accent);
+  font-family: var(--font-pixel);
+  font-size: clamp(16px, 2vw, 22px);
+  letter-spacing: 3px;
+  padding: clamp(14px, 2vh, 22px) clamp(28px, 4vw, 48px);
+  cursor: pointer;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(12px, 1.5vw, 20px);
+  box-shadow:
+    0 0 0 4px rgba(255, 216, 61, 0.04),
+    0 8px 0 0 rgba(255, 216, 61, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background 120ms ease;
+  animation: startBtnPulse 1.8s ease-in-out infinite;
+  position: relative;
+}
+
+.start-btn:hover {
+  background: rgba(255, 216, 61, 0.14);
+  box-shadow:
+    0 0 0 6px rgba(255, 216, 61, 0.06),
+    0 6px 0 0 rgba(255, 216, 61, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.start-btn:active {
+  transform: translateY(4px);
+  box-shadow:
+    0 0 0 4px rgba(255, 216, 61, 0.04),
+    0 2px 0 0 rgba(255, 216, 61, 0.18);
+}
+
+.start-btn:focus-visible {
+  outline: 2px dashed var(--accent);
+  outline-offset: 6px;
+}
+
+.start-btn__chev {
+  font-size: 0.7em;
+  animation: chevBlink 1.4s steps(2) infinite;
+}
+
+.start-btn__label {
+  display: inline-block;
+}
+
+@keyframes startBtnPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 4px rgba(255, 216, 61, 0.04),
+      0 8px 0 0 rgba(255, 216, 61, 0.18),
+      0 0 24px rgba(255, 216, 61, 0.25),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+  50% {
+    box-shadow:
+      0 0 0 4px rgba(255, 216, 61, 0.08),
+      0 8px 0 0 rgba(255, 216, 61, 0.22),
+      0 0 48px rgba(255, 216, 61, 0.5),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+}
+
+@keyframes chevBlink {
+  0%, 50%   { opacity: 1; }
+  51%, 100% { opacity: 0.15; }
+}
+
+.start-screen__hint {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: clamp(9px, 0.8vw, 10px);
+  letter-spacing: 2px;
+  color: var(--text-dim);
+}
+
+/* ================================================================
+   BACKGROUND — pixel-art volleyball arena
+   ================================================================ */
+
+.bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bg__sky {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse at 50% 0%,
+      #2a1f5a 0%,
+      #1c1740 45%,
+      #14102b 100%
+    );
+}
+
+.bg__stars {
+  position: absolute;
+  inset: 0;
+}
+
+.bg__star {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: var(--text);
+  border-radius: 50%;
+  opacity: 0.3;
+}
+
+.bg__court {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Visible arena region — sits between panels row and footer.
+   Panels cover upper ~40% of viewport; footer ~3% bottom;
+   so the court is visible in the middle ~50% band. */
+.bg__court::before {
+  content: '';
+  position: absolute;
+  inset: clamp(220px, 42vh, 360px) 4% clamp(48px, 6vh, 70px) 4%;
+  border-radius: 4px;
+}
+
+.court__floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 32%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 216, 61, 0.0) 0%,
+    rgba(255, 216, 61, 0.04) 60%,
+    rgba(255, 216, 61, 0.08) 100%
+  );
+  border-top: 1px solid rgba(255, 216, 61, 0.10);
+}
+
+.court__svg {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: 44%;
+  bottom: 6%;
+  width: 88%;
+  height: 48%;
+  opacity: 0.6;
+}
+
+.court__net {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  bottom: 8%;
+  width: 4px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.net__post {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  width: 6px;
+  background: rgba(255, 216, 61, 0.40);
+  box-shadow: 0 0 0 1px rgba(255, 216, 61, 0.10);
+}
+.net__post--left  { left: -8px; }
+.net__post--right { right: -8px; }
+
+.net__mesh {
+  position: absolute;
+  inset: 0;
+  left: -6px;
+  right: -6px;
+  background-image:
+    radial-gradient(
+      circle at 2px 2px,
+      rgba(255, 216, 61, 0.32) 1px,
+      transparent 1.5px
+    );
+  background-size: 4px 4px;
+  opacity: 0.65;
+}
+
+.net__top {
+  position: absolute;
+  left: -10px;
+  right: -10px;
+  top: -3px;
+  height: 4px;
+  background: rgba(255, 216, 61, 0.40);
+  border-top: 1px solid rgba(255, 216, 61, 0.55);
+  border-bottom: 1px solid rgba(255, 216, 61, 0.20);
+}
+
+.court__shadow {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 14%;
+  height: 14px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 216, 61, 0.10) 0%,
+    rgba(255, 216, 61, 0.0) 70%
+  );
+  filter: blur(2px);
+}
+
+/* ---------- Pixel players ---------- */
+
+.court__players {
+  position: absolute;
+  /* Live in the arena band only (between panels and footer) */
+  left: 6%;
+  right: 6%;
+  top: 46%;
+  bottom: 8%;
+  pointer-events: none;
+}
+
+.player-slot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  animation: slotFadeFront 600ms ease both;
+  /* Smooth motion between keyframes (set by React) */
+  transition:
+    left 220ms cubic-bezier(0.45, 0.05, 0.55, 0.95),
+    top 220ms cubic-bezier(0.45, 0.05, 0.55, 0.95);
+  will-change: left, top;
+}
+
+/* When jumping, suppress the transition (the jump keyframes own the motion) */
+.player-slot.is-jumping {
+  transition:
+    left 220ms cubic-bezier(0.45, 0.05, 0.55, 0.95),
+    top 220ms cubic-bezier(0.45, 0.05, 0.55, 0.95),
+    transform 80ms ease-out;
+}
+
+/* Front row = bigger (closer), back row = smaller (farther). */
+.player-slot--back {
+  transform: translate(-50%, -50%) scale(0.78);
+  animation-name: slotFadeBack;
+}
+.player-slot--back.is-jumping {
+  transform: translate(-50%, -50%) scale(0.78);
+}
+
+@keyframes slotFadeFront {
+  from { opacity: 0; transform: translate(-50%, -30%); }
+  to   { opacity: 1; transform: translate(-50%, -50%); }
+}
+@keyframes slotFadeBack {
+  from { opacity: 0; transform: translate(-50%, -30%) scale(0.78); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(0.78); }
+}
+
+/* PixelPlayer body */
+.player {
+  position: relative;
+  width: 26px;
+  height: 44px;
+  animation:
+    playerIdle 2.6s ease-in-out infinite,
+    playerJump 14s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  animation-delay: 0s, var(--jump-delay, 0s);
+  will-change: transform;
+  image-rendering: pixelated;
+}
+
+.player--back {
+  width: 22px;
+  height: 36px;
+}
+
+.player__body {
+  position: absolute;
+  inset: 0;
+}
+
+.player__head {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  transform: translateX(-50%);
+  background: #f3d3a4;
+  border: 1px solid rgba(0, 0, 0, 0.45);
+  border-radius: 2px;
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.18);
+}
+
+.player--cyan .player__head {
+  background: #f3d3a4;
+}
+.player--pink .player__head {
+  background: #f3d3a4;
+}
+
+.player__torso {
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  width: 18px;
+  height: 18px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  border-radius: 2px;
+}
+.player--cyan .player__torso {
+  background: linear-gradient(180deg, var(--team-a) 60%, #2c8aa6 100%);
+  box-shadow: inset 2px 0 0 rgba(255,255,255,0.25);
+}
+.player--pink .player__torso {
+  background: linear-gradient(180deg, var(--team-b) 60%, #a13885 100%);
+  box-shadow: inset 2px 0 0 rgba(255,255,255,0.25);
+}
+
+.player__legs {
+  position: absolute;
+  left: 50%;
+  top: 30px;
+  width: 18px;
+  height: 14px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+}
+
+.player__leg {
+  display: inline-block;
+  width: 7px;
+  height: 14px;
+  background: #2a2454;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  border-radius: 1px;
+}
+
+.player__arm {
+  position: absolute;
+  top: 13px;
+  width: 4px;
+  height: 12px;
+  background: #f3d3a4;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  border-radius: 1px;
+}
+.player__arm--l { left: -2px; }
+.player__arm--r { right: -2px; }
+
+/* Player size variants (front = bigger, back = smaller) */
+.player--back .player__head { width: 10px; height: 10px; }
+.player--back .player__torso { width: 14px; height: 14px; top: 10px; }
+.player--back .player__legs { top: 24px; width: 14px; height: 12px; }
+.player--back .player__leg { width: 5px; height: 12px; }
+.player--back .player__arm { top: 11px; height: 10px; }
+
+/* Subtle idle bobbing — only when not currently jumping.
+   The .is-jumping class adds a one-shot jump animation above. */
+.player-slot:not(.is-jumping) .player {
+  animation: playerIdle 2.6s ease-in-out infinite;
+}
+
+@keyframes playerIdle {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-1.5px); }
+}
+
+/* The reactive spike-jump keyframes live with .is-jumping above. */
+
+/* Player label */
+.player__label {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  margin-top: 4px;
+  font-family: var(--font-pixel);
+  font-size: clamp(7px, 0.6vw, 8px);
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  text-shadow: 0 1px 0 rgba(10, 7, 28, 0.9);
+  pointer-events: none;
+}
+
+/* ---------- Animated volleyball (React-driven position) ---------- */
+
+.ball {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;   /* center on x */
+  margin-top: -14px;   /* baseline on floor */
+  z-index: 2;
+  transition: filter 200ms;
+  filter: drop-shadow(0 0 4px rgba(255, 240, 180, 0.55));
+  pointer-events: none;
+  will-change: transform;
+}
+
+.ball__pixel {
+  display: block;
+  width: 14px;
+  height: 14px;
+  background:
+    linear-gradient(45deg, transparent 42%, rgba(255, 255, 255, 0.45) 42%, rgba(255, 255, 255, 0.45) 58%, transparent 58%),
+    linear-gradient(-45deg, transparent 42%, rgba(255, 255, 255, 0.35) 42%, rgba(255, 255, 255, 0.35) 58%, transparent 58%),
+    radial-gradient(circle at 35% 30%, #ffffff 0%, #f4ecd0 40%, #d9c98a 100%);
+  border-radius: 50%;
+  box-shadow:
+    0 0 8px rgba(255, 240, 180, 0.45),
+    inset 0 0 0 1px rgba(180, 150, 60, 0.45);
+  transform-origin: center;
+  image-rendering: pixelated;
+  animation: ballSpin 1.2s linear infinite;
+  will-change: transform;
+}
+
+/* Continuous rotation; the parent .ball is positioned by React. */
+@keyframes ballSpin {
+  to { transform: rotate(360deg); }
+}
+
+.ball__trail {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  margin-left: -9px;
+  margin-top: -18px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(255, 216, 61, 0.10) 40%,
+    rgba(255, 255, 255, 0.0) 70%
+  );
+  filter: blur(3px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ---------- Impact burst when ball lands ---------- */
+
+.ball-impact {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  margin-left: -30px;
+  margin-top: -30px;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.ball-impact__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  animation: impactRing 700ms ease-out forwards;
+}
+
+.ball-impact--cyan .ball-impact__ring { border-color: var(--team-a, #52e0e8); }
+.ball-impact--pink .ball-impact__ring { border-color: var(--team-b, #ff69b4); }
+
+.ball-impact__ring--delay {
+  animation-delay: 90ms;
+  border-width: 1px;
+}
+
+@keyframes impactRing {
+  0%   { transform: scale(0.1); opacity: 1; }
+  100% { transform: scale(1.4);  opacity: 0; }
+}
+
+.ball-impact__label {
+  position: absolute;
+  left: 50%;
+  top: -22px;
+  transform: translateX(-50%);
+  font-family: var(--font-pixel, monospace);
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  color: #ffd83d;
+  text-shadow:
+    0 0 6px rgba(255, 216, 61, 0.8),
+    0 2px 0 rgba(0, 0, 0, 0.7);
+  animation: impactLabel 1300ms ease-out forwards;
+  white-space: nowrap;
+}
+
+.ball-impact--cyan .ball-impact__label { color: #82e8ee; text-shadow: 0 0 6px rgba(82, 224, 232, 0.85), 0 2px 0 rgba(0, 0, 0, 0.7); }
+.ball-impact--pink .ball-impact__label { color: #ff9bd0; text-shadow: 0 0 6px rgba(255, 105, 180, 0.85), 0 2px 0 rgba(0, 0, 0, 0.7); }
+
+@keyframes impactLabel {
+  0%   { transform: translate(-50%, 0)   scale(0.5); opacity: 0; }
+  18%  { transform: translate(-50%, -6px) scale(1.2); opacity: 1; }
+  35%  { transform: translate(-50%, -10px) scale(1);   opacity: 1; }
+  100% { transform: translate(-50%, -32px) scale(0.95); opacity: 0; }
+}
+
+/* ---------- Reactive player jump (set by .is-jumping class) ---------- */
+
+.player-slot.is-jumping .player {
+  animation: playerJumpReact 600ms cubic-bezier(0.45, 0.05, 0.55, 0.95) both !important;
+}
+
+@keyframes playerJumpReact {
+  0%   { transform: translateY(0)    scale(1, 1); }
+  20%  { transform: translateY(-4px) scale(0.95, 1.05); }
+  40%  { transform: translateY(-22px) scale(0.9, 1.15); }
+  60%  { transform: translateY(-22px) scale(0.9, 1.15); }
+  80%  { transform: translateY(-6px) scale(1, 1); }
+  100% { transform: translateY(0)    scale(1, 1); }
+}
+
+/* Spiking/blocking arms-up modifier — applies when position is hitter/blocker and jumping */
+.player-slot[data-pos="hitter"].is-jumping .player__arm--r,
+.player-slot[data-pos="blocker"].is-jumping .player__arm--r,
+.player-slot[data-pos="blocker"].is-jumping .player__arm--l {
+  animation: armRaise 600ms ease-out;
+  transform-origin: bottom center;
+}
+
+@keyframes armRaise {
+  0%   { transform: rotate(0deg) translateY(0); }
+  40%  { transform: rotate(-150deg) translateY(-4px); }
+  100% { transform: rotate(0deg) translateY(0); }
+}
+
+/* ---------- Subtle particles ---------- */
+
+.bg__particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  background: rgba(255, 240, 180, 0.5);
+  border-radius: 50%;
+  filter: blur(0.5px);
+  animation: particleFloat linear infinite;
+}
+
+@keyframes particleFloat {
+  0%   { transform: translate(0, 0); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translate(0, -18px); opacity: 0; }
+}
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+
+@media (max-height: 720px) {
+  .hero-title { font-size: clamp(16px, 2.2vw, 28px); }
+  .hero-subtitle { font-size: 12px; }
+  .panel { padding: 8px 12px; }
+  .item { padding: 5px 10px; }
+  .item__title { font-size: 11px; }
+  .item__desc  { font-size: 10px; -webkit-line-clamp: 1; }
+  .start-screen__title { font-size: 22px; }
+  .start-btn { font-size: 16px; padding: 14px 36px; }
+  .scoreboard__roster { font-size: 9px; }
+}
+
+@media (max-width: 1280px) {
+  .scoreboard__roster { display: none; } /* free up width on smaller screens */
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .ball, .ball__trail, .particle,
+  .player, .crest__ball, .start-btn,
+  .start-btn__chev, .scoreboard__chip,
+  .start-screen {
+    animation: none !important;
+  }
+  .ball, .ball__trail {
+    left: 45%;
+    top: 55%;
+    opacity: 0.6;
+  }
+  .player { transform: none !important; }
+}

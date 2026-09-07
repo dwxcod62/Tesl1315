@@ -1,0 +1,87 @@
+:root {
+  /* --- Calmer, presentation-friendly palette --- */
+  --bg-deep: #14102b;
+  --bg-mid: #1c1740;
+  --bg-soft: #251d54;
+
+  /* Primary accent: volleyball yellow */
+  --accent: #ffd83d;
+  --accent-deep: #f5b800;
+
+  /* Secondary accent: warm coral (used very sparingly) */
+  --coral: #ff8a6b;
+
+  /* Team colors (used for player jerseys + scoreboard chips) */
+  --team-a: #62e1ff; /* cyan */
+  --team-b: #ff7ad9; /* pink */
+
+  /* Neutral text — high contrast for readability */
+  --text: #f5f1fa;
+  --text-muted: #d4cce6;
+  --text-dim: #9890b0;
+
+  /* Surfaces */
+  --surface: rgba(255, 255, 255, 0.035);
+  --surface-strong: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.18);
+
+  /* Pixel-black for any genuine pixel accents */
+  --pixel-black: #0a0717;
+
+  /* Typography */
+  --font-pixel: 'Press Start 2P', ui-monospace, Consolas, monospace;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  color-scheme: dark;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-deep);
+}
+
+#root {
+  width: 100vw;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.app-root {
+  width: 100vw;
+  height: 100svh;
+  overflow: hidden;
+  position: relative;
+}
+
+.pixelated,
+img {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--pixel-black);
+}
