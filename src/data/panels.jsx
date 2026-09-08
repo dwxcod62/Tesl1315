@@ -72,7 +72,7 @@ export const BENEFITS = [
     icon: 'bolt',
   },
   {
-    title: 'Shared Experiences',
+    title: 'Cultural Understanding',
     body: 'People can learn about different cultures by meeting and playing with others',
     icon: 'ball',
   },
