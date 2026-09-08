@@ -73,7 +73,7 @@ export const BENEFITS = [
   },
   {
     title: 'Shared Experiences',
-    body: 'Connect through games, tournaments, practices, and social events.',
+    body: 'People can learn about different cultures by meeting and playing with others',
     icon: 'ball',
   },
 ];
