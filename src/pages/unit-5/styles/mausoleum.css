@@ -1,0 +1,932 @@
+/* ================================================================
+   UNIT 5 — MAUSOLEUM
+   one-screen layout · scene + light text · next/prev nav
+   no scroll
+   ================================================================ */
+
+.unit5-root {
+  position: relative;
+  width: 100vw;
+  min-height: 100svh;
+  height: 100svh;
+  background:
+    radial-gradient(ellipse at 50% 0%, #2a2218 0%, #14100a 60%, #0a0805 100%);
+  color: #e8dcc4;
+  font-family: 'IM Fell English SC', 'Cinzel', Georgia, serif;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(8px, 1.1vh, 14px);
+  padding: clamp(14px, 1.9vh, 22px) clamp(20px, 3vw, 56px) clamp(12px, 1.7vh, 20px);
+  font-feature-settings: 'smcp' on, 'c2sc' on;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---------- CRT scanlines ---------- */
+.unit5-crt {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.18) 0px,
+      rgba(0, 0, 0, 0.18) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  mix-blend-mode: multiply;
+  opacity: 0.4;
+}
+
+.unit5-crt--glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 49;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 40%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+}
+
+/* ---------- Header ---------- */
+.unit5-head {
+  text-align: center;
+  z-index: 2;
+}
+
+.unit5-matrix {
+  position: relative;
+  margin: 0 auto 10px;
+  width: min(820px, 100%);
+  height: 96px;
+  border: 1px solid #6e5727;
+  background:
+    radial-gradient(ellipse at center, rgba(40, 28, 12, 0.6) 0%, rgba(10, 8, 5, 0.95) 100%);
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 195, 90, 0.08),
+    inset 0 0 30px rgba(0, 0, 0, 0.7),
+    0 0 16px rgba(255, 195, 90, 0.08);
+}
+
+.unit5-matrix-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.unit5-matrix-label {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  letter-spacing: 4px;
+  color: #c9a35a;
+  background: rgba(10, 8, 5, 0.78);
+  padding: 5px 11px;
+  border: 1px solid #6e5727;
+  z-index: 1;
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 600;
+}
+
+.unit5-eyebrow {
+  display: inline-block;
+  font-size: clamp(10px, 0.85vw, 12px);
+  letter-spacing: 4px;
+  color: #c9a35a;
+  border: 1px solid #6e5727;
+  padding: 5px 10px;
+  background: rgba(40, 28, 12, 0.6);
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 600;
+}
+
+.unit5-title {
+  margin: 10px 0 4px;
+  font-size: clamp(26px, 3.2vw, 44px);
+  letter-spacing: 8px;
+  color: #f4e0a8;
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 700;
+  font-variant: small-caps;
+  text-shadow:
+    2px 2px 0 #1a1206,
+    0 0 24px rgba(255, 195, 90, 0.22);
+}
+
+.unit5-host {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 3px;
+  color: #8a7a5a;
+  font-family: 'IM Fell English SC', Georgia, serif;
+  font-style: italic;
+}
+
+/* ---------- Stage wrap (the scene frame) ---------- */
+.unit5-stage-wrap {
+  position: relative;
+  z-index: 2;
+  margin: 0 auto;
+  width: min(820px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.unit5-stage-stamp {
+  position: absolute;
+  right: 0;
+  top: -10px;
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: #b85a3a;
+  border: 1px solid #6e2a1a;
+  padding: 5px 11px;
+  background: rgba(40, 10, 6, 0.6);
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  transform: rotate(-3deg);
+  transform-origin: top right;
+}
+
+.unit5-scene-frame {
+  position: relative;
+  border: 2px solid #6e5727;
+  background: rgba(14, 10, 5, 0.85);
+  padding: 14px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 195, 90, 0.12),
+    inset 0 0 60px rgba(0, 0, 0, 0.7),
+    0 0 0 4px rgba(20, 14, 6, 0.8),
+    0 8px 0 -2px rgba(0, 0, 0, 0.7);
+  display: grid;
+  gap: 8px;
+}
+
+.unit5-corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #f4e0a8;
+  z-index: 1;
+}
+.unit5-corner--tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+.unit5-corner--tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+.unit5-corner--bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+.unit5-corner--br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+.unit5-scene {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: #0a0805;
+  border: 1px solid #3a2a14;
+  overflow: hidden;
+  animation: unit5WipeIn 320ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes unit5WipeIn {
+  0%   { clip-path: inset(0 100% 0 0); opacity: 0.4; }
+  60%  { opacity: 1; }
+  100% { clip-path: inset(0 0 0 0); opacity: 1; }
+}
+
+.unit5-scene-tag {
+  font-size: 13px;
+  letter-spacing: 4px;
+  color: #c9a35a;
+  text-align: center;
+  padding-top: 6px;
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 500;
+  font-variant: small-caps;
+}
+
+/* ---------- Info (light text block) ---------- */
+.unit5-info {
+  position: relative;
+  z-index: 2;
+  margin: 0 auto;
+  width: min(820px, 100%);
+  display: grid;
+  gap: 10px;
+  animation: unit5FadeUp 280ms ease 80ms both;
+}
+
+@keyframes unit5FadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.unit5-info-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #6e5727;
+}
+
+.unit5-info-code {
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: #8a7a5a;
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 500;
+  font-variant: small-caps;
+}
+
+.unit5-info-title {
+  margin: 4px 0;
+  font-size: clamp(24px, 2.6vw, 36px);
+  letter-spacing: 6px;
+  color: #f4e0a8;
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 700;
+  font-variant: small-caps;
+  text-shadow: 2px 2px 0 #1a1206;
+}
+
+.unit5-info-caption {
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: #c9a35a;
+  font-family: 'IM Fell English SC', Georgia, serif;
+  font-style: italic;
+}
+
+.unit5-info-line1 {
+  margin: 0;
+  font-size: clamp(15px, 1.5vw, 19px);
+  line-height: 1.65;
+  letter-spacing: 1.6px;
+  color: #f4e0a8;
+  font-family: 'IM Fell English SC', Georgia, serif;
+  font-variant: small-caps;
+}
+
+.unit5-info-line2 {
+  margin: 0;
+  font-size: clamp(14px, 1.25vw, 17px);
+  line-height: 1.65;
+  letter-spacing: 1.4px;
+  color: #b8a07a;
+  font-family: 'IM Fell English', Georgia, serif;
+  font-style: italic;
+}
+
+/* ---------- Nav (prev / dots / next) ---------- */
+.unit5-nav {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0 auto;
+  width: min(820px, 100%);
+}
+
+.unit5-nav-btn {
+  appearance: none;
+  background: rgba(20, 14, 6, 0.85);
+  border: 2px solid #6e5727;
+  color: #c9a35a;
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 600;
+  font-variant: small-caps;
+  font-size: 14px;
+  letter-spacing: 4px;
+  padding: 12px 22px;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.unit5-nav-btn:hover:not(:disabled) {
+  border-color: #f4e0a8;
+  background: rgba(40, 28, 12, 0.95);
+  transform: translateY(-1px);
+}
+
+.unit5-nav-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.unit5-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.unit5-dots {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.unit5-dot {
+  appearance: none;
+  background: transparent;
+  border: 1px solid #6e5727;
+  color: #8a7a5a;
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 500;
+  font-variant: small-caps;
+  font-size: 13px;
+  letter-spacing: 2.5px;
+  padding: 8px 13px;
+  cursor: pointer;
+  transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
+}
+
+.unit5-dot:hover {
+  border-color: #c9a35a;
+  color: #c9a35a;
+}
+
+.unit5-dot.is-active {
+  border-color: #f4e0a8;
+  background: rgba(255, 195, 90, 0.12);
+  color: #f4e0a8;
+  box-shadow: 0 0 12px rgba(255, 195, 90, 0.25);
+}
+
+.unit5-dot-num {
+  font-size: 13px;
+  letter-spacing: 2.5px;
+}
+
+/* ---------- Footer ---------- */
+.unit5-foot {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: #6e5727;
+  font-family: 'IM Fell English SC', Georgia, serif;
+  font-variant: small-caps;
+}
+
+/* ---------- Responsive squeeze (laptops / small screens) ---------- */
+@media (max-height: 720px) {
+  .unit5-root { padding: 14px 24px; gap: 10px; }
+  .unit5-title { font-size: clamp(18px, 2.1vw, 28px); letter-spacing: 6px; }
+  .unit5-scene { aspect-ratio: 16 / 9; }
+  .unit5-info-line1 { font-size: 13px; }
+  .unit5-info-line2 { font-size: 11px; }
+}
+
+@media (max-width: 640px) {
+  .unit5-nav-btn { padding: 8px 12px; font-size: 10px; letter-spacing: 3px; }
+  .unit5-dot { padding: 5px 8px; font-size: 10px; }
+  .unit5-stage-stamp { display: none; }
+  .unit5-title { letter-spacing: 5px; }
+  .unit5-info-title { letter-spacing: 4px; }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .unit5-crt,
+  .unit5-crt--glow { display: none; }
+  .unit5-scene,
+  .unit5-info { animation: none; }
+  .unit5-matrix-canvas { display: none; }
+  .unit5-matrix::before {
+    content: '// FILE 05 · QIN SHI HUANG · 221 BCE';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f4e0a8;
+    font-size: 16px;
+    letter-spacing: 4px;
+  }
+}
+
+/* ---------- Horror effects (UNOPENED TOMB only) ---------- */
+.unit5-ash {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  opacity: 0;
+  transition: opacity 800ms ease;
+}
+.unit5-ash.is-active {
+  opacity: 1;
+}
+
+.unit5-noise {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 70;
+  mix-blend-mode: screen;
+  animation: unit5-noise-flash 280ms steps(6, end) forwards;
+}
+@keyframes unit5-noise-flash {
+  0%   { opacity: 0; }
+  10%  { opacity: 0.95; }
+  35%  { opacity: 0.85; }
+  60%  { opacity: 0.55; }
+  100% { opacity: 0; }
+}
+
+/* TV static / vintage electrical interference */
+.unit5-tvstatic {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 65;
+  opacity: 0;
+  transition: opacity 80ms steps(2, end);
+  mix-blend-mode: screen;
+}
+.unit5-tvstatic.is-active {
+  opacity: 1;
+}
+.unit5-tvstatic__canvas {
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
+
+.unit5-blackout {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 80;
+  background: #000;
+  animation: unit5-blackout-cycle 900ms ease-in-out forwards;
+}
+.unit5-blackout__flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 220, 180, 0.4) 0%, transparent 60%);
+  opacity: 0;
+  animation: unit5-blackout-flash 200ms ease-out 250ms forwards;
+}
+@keyframes unit5-blackout-cycle {
+  0%   { opacity: 0; }
+  20%  { opacity: 1; }
+  55%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes unit5-blackout-flash {
+  0%   { opacity: 0; }
+  50%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.unit5-eyes {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 68;
+  animation: unit5-eyes-blink 1100ms steps(3, end) forwards;
+}
+.unit5-eye {
+  position: absolute;
+  top: 32%;
+  width: clamp(120px, 14vw, 220px);
+  height: clamp(72px, 8.4vw, 130px);
+  left: 8%;
+  filter: drop-shadow(0 0 14px rgba(184, 30, 30, 0.6));
+}
+.unit5-eye.is-flip {
+  left: auto;
+  right: 8%;
+  transform: scaleX(-1);
+}
+@keyframes unit5-eyes-blink {
+  0%   { opacity: 0; }
+  10%  { opacity: 1; }
+  25%  { opacity: 0; }
+  35%  { opacity: 1; }
+  55%  { opacity: 0; }
+  65%  { opacity: 1; }
+  80%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* Frame slide — gentle drift right, snap back to centre */
+.unit5-scene-frame.is-frightened {
+  animation: unit5-frame-drift 2400ms ease-in-out;
+}
+@keyframes unit5-frame-drift {
+  0%   { transform: translateX(0); }
+  70%  { transform: translateX(58px); }
+  72%  { transform: translateX(58px); }
+  78%  { transform: translateX(-10px); }
+  82%  { transform: translateX(6px); }
+  88%  { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
+
+/* Scramble — full-screen overlay with re-rendered scrambled text */
+.unit5-scramble {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 62;
+  mix-blend-mode: difference;
+  animation: unit5-scramble-flicker 90ms steps(2, end) infinite;
+}
+@keyframes unit5-scramble-flicker {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.88; }
+  100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .unit5-ash,
+  .unit5-noise,
+  .unit5-tvstatic,
+  .unit5-blackout,
+  .unit5-eyes,
+  .unit5-scramble,
+  .unit5-scene-frame.is-frightened { animation: none; display: none; }
+}
+
+/* ================================================================
+   INTRO · TOMB ENTRANCE (start screen)
+   ================================================================ */
+.unit5-root.is-hidden {
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+}
+.unit5-root.is-revealed {
+  visibility: visible;
+  opacity: 1;
+  /* Reveal happens AFTER the ramp wipe — delay 600ms to let the fiery
+     ramp finish before the main UI fades up. */
+  transition: opacity 900ms ease 600ms;
+}
+
+.unit5-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: radial-gradient(ellipse at 50% 35%, #2a1c14 0%, #0e0908 55%, #050302 100%);
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  font-family: inherit;
+}
+
+/* Vignette + film grain edges */
+.unit5-intro__vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.55) 100%),
+    linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 18%, transparent 80%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+}
+
+.unit5-intro__horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 18%;
+  height: 1px;
+  background: linear-gradient(to right, transparent 0%, rgba(196, 158, 102, 0.45) 50%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Mist layers drifting across the tomb */
+.unit5-intro__mist {
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  height: 60%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 30% 60% at 20% 50%, rgba(196, 158, 102, 0.10), transparent 70%),
+    radial-gradient(ellipse 40% 80% at 70% 60%, rgba(120, 88, 56, 0.12), transparent 70%);
+  filter: blur(20px);
+}
+.unit5-intro__mist--a { top: 25%; animation: unit5-intro-mist-a 18s ease-in-out infinite; }
+.unit5-intro__mist--b {
+  top: 45%;
+  opacity: 0.7;
+  animation: unit5-intro-mist-b 24s ease-in-out infinite reverse;
+}
+@keyframes unit5-intro-mist-a {
+  0%,100% { transform: translateX(-3%); }
+  50%     { transform: translateX(5%); }
+}
+@keyframes unit5-intro-mist-b {
+  0%,100% { transform: translateX(4%); }
+  50%     { transform: translateX(-6%); }
+}
+
+/* Tomb structure */
+.unit5-intro__tomb {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  transform: translate(-50%, -50%);
+  width: min(640px, 70vw);
+  aspect-ratio: 1.6 / 1;
+  pointer-events: none;
+}
+
+.unit5-intro__mound {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 100%, rgba(0,0,0,0.7), transparent 65%),
+    linear-gradient(180deg, #3b2a1c 0%, #1f140d 60%, #0a0604 100%);
+  clip-path: polygon(
+    0% 100%, 6% 65%, 14% 38%, 26% 20%, 42% 10%,
+    58% 10%, 74% 20%, 86% 38%, 94% 65%, 100% 100%
+  );
+  box-shadow: inset 0 -40px 80px rgba(0,0,0,0.7);
+}
+.unit5-intro__mound-shadow {
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  bottom: -8px;
+  height: 30px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.65), transparent 70%);
+  filter: blur(8px);
+}
+
+/* Doorway carved into the mound */
+.unit5-intro__doorway {
+  position: absolute;
+  left: 50%;
+  bottom: 14%;
+  width: 22%;
+  height: 38%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.unit5-intro__doorlight {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 30%, rgba(255, 196, 120, 0.45), rgba(184, 30, 30, 0.25) 50%, transparent 75%);
+  filter: blur(8px);
+  opacity: 0.85;
+  animation: unit5-intro-doorlight-pulse 3.5s ease-in-out infinite;
+}
+@keyframes unit5-intro-doorlight-pulse {
+  0%,100% { opacity: 0.6; transform: scale(1); }
+  50%     { opacity: 1;   transform: scale(1.08); }
+}
+
+.unit5-intro__doorframe {
+  position: absolute;
+  inset: 8% 14%;
+  border: 2px solid rgba(196, 158, 102, 0.55);
+  border-bottom: none;
+  border-radius: 60% 60% 0 0 / 80% 80% 0 0;
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 30px rgba(0,0,0,0.7),
+    0 0 24px rgba(255, 160, 80, 0.18);
+}
+
+.unit5-intro__door {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  background:
+    linear-gradient(180deg, #2a1a10 0%, #1a0d07 60%, #0a0402 100%);
+  border: 1px solid rgba(196, 158, 102, 0.4);
+  box-shadow: inset 0 0 14px rgba(0,0,0,0.8);
+  transition: transform 1200ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+.unit5-intro__door--l { left: 0;  transform-origin: left center; }
+.unit5-intro__door--r { right: 0; transform-origin: right center; }
+
+.unit5-intro__rivet {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #c49866 0%, #4a2f1c 80%);
+  box-shadow: 0 0 4px rgba(196, 158, 102, 0.4);
+}
+.unit5-intro__door--l .unit5-intro__rivet:nth-child(1) { top: 16%; right: 18%; }
+.unit5-intro__door--l .unit5-intro__rivet:nth-child(2) { top: 50%; right: 14%; }
+.unit5-intro__door--l .unit5-intro__rivet:nth-child(3) { top: 84%; right: 22%; }
+.unit5-intro__door--r .unit5-intro__rivet:nth-child(1) { top: 16%; left: 18%; }
+.unit5-intro__door--r .unit5-intro__rivet:nth-child(2) { top: 50%; left: 14%; }
+.unit5-intro__rivet:nth-child(3) { top: 84%; left: 22%; }
+
+/* Stone glyphs flanking the door */
+.unit5-intro__glyph {
+  position: absolute;
+  top: -22px;
+  font-family: serif;
+  font-size: 28px;
+  color: rgba(196, 158, 102, 0.7);
+  text-shadow: 0 0 8px rgba(196, 158, 102, 0.35);
+}
+.unit5-intro__glyph--l { left: -10px; }
+.unit5-intro__glyph--r { right: -10px; }
+
+/* Foreground copy */
+.unit5-intro__copy {
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  transform: translateX(-50%);
+  text-align: center;
+  pointer-events: none;
+  color: #e9d6ad;
+}
+.unit5-intro__kicker {
+  font-family: ui-monospace, Menlo, monospace;
+  letter-spacing: 0.22em;
+  font-size: 11px;
+  color: rgba(196, 158, 102, 0.7);
+  margin: 0 0 12px;
+}
+.unit5-intro__title {
+  font-family: 'Times New Roman', serif;
+  font-size: clamp(34px, 5vw, 56px);
+  letter-spacing: 0.18em;
+  margin: 0 0 14px;
+  font-weight: 400;
+  text-shadow: 0 0 18px rgba(255, 160, 80, 0.18);
+  line-height: 1.1;
+}
+.unit5-intro__title em {
+  font-style: italic;
+  color: #f4d990;
+  font-size: 0.62em;
+  letter-spacing: 0.22em;
+}
+
+/* Click hint */
+.unit5-intro__hint {
+  position: absolute;
+  left: 50%;
+  bottom: 8%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  color: rgba(196, 158, 102, 0.55);
+  opacity: 0;
+  transition: opacity 800ms ease;
+  pointer-events: none;
+}
+.unit5-intro__hint.is-hinted { opacity: 1; }
+.unit5-intro__hint-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c49866;
+  box-shadow: 0 0 12px rgba(196, 158, 102, 0.7);
+  animation: unit5-intro-pulse 1.6s ease-in-out infinite;
+}
+@keyframes unit5-intro-pulse {
+  0%,100% { transform: scale(1);   opacity: 1; }
+  50%     { transform: scale(1.6); opacity: 0.4; }
+}
+
+/* Opening ramp: black sheet sweeps down + scanlines */
+.unit5-intro__ramp {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: #050302;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 1300ms cubic-bezier(0.7, 0, 0.85, 0.15);
+}
+.unit5-intro__ramp-scan {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.03) 0 2px,
+      transparent 2px 4px
+    );
+  opacity: 0.4;
+}
+
+/* Opening state: doors split, ramp wipes down, content fades */
+.unit5-intro.is-opening .unit5-intro__door--l {
+  transform: perspective(420px) translateX(-18px) rotateY(95deg) translateZ(0);
+  transition: transform 1400ms cubic-bezier(0.62, 0, 0.18, 1) 80ms,
+              box-shadow 1400ms ease 80ms;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.9), -8px 0 18px rgba(255, 160, 80, 0.35);
+}
+.unit5-intro.is-opening .unit5-intro__door--r {
+  transform: perspective(420px) translateX(18px) rotateY(-95deg) translateZ(0);
+  transition: transform 1400ms cubic-bezier(0.62, 0, 0.18, 1) 80ms,
+              box-shadow 1400ms ease 80ms;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.9), 8px 0 18px rgba(255, 160, 80, 0.35);
+}
+
+/* Door light flares harder + shrinks back so light "escapes" */
+.unit5-intro.is-opening .unit5-intro__doorlight {
+  animation:
+    unit5-intro-doorlight-burst 0.55s ease-out 200ms 1,
+    unit5-intro-doorlight-steady 1.2s ease-in-out 800ms infinite;
+}
+@keyframes unit5-intro-doorlight-burst {
+  0%   { opacity: 0.9; transform: scale(1); }
+  60%  { opacity: 1;   transform: scale(1.7); }
+  100% { opacity: 0.85; transform: scale(1.15); }
+}
+@keyframes unit5-intro-doorlight-steady {
+  0%,100% { opacity: 0.7; }
+  50%     { opacity: 1; }
+}
+
+/* Stone glyphs jitter, then drift apart */
+.unit5-intro.is-opening .unit5-intro__glyph {
+  animation: unit5-intro-glyph-flee 1100ms cubic-bezier(0.5, 0, 0.6, 1) forwards;
+  color: rgba(255, 196, 120, 1);
+  text-shadow: 0 0 16px rgba(255, 160, 80, 0.8);
+}
+.unit5-intro.is-opening .unit5-intro__glyph--l { animation-name: unit5-intro-glyph-flee-l; }
+.unit5-intro.is-opening .unit5-intro__glyph--r { animation-name: unit5-intro-glyph-flee-r; }
+@keyframes unit5-intro-glyph-flee-l {
+  0%   { transform: translateX(0)   rotate(0); }
+  40%  { transform: translateX(-6px) rotate(-3deg); }
+  100% { transform: translateX(-26px) rotate(-12deg); opacity: 0; }
+}
+@keyframes unit5-intro-glyph-flee-r {
+  0%   { transform: translateX(0)   rotate(0); }
+  40%  { transform: translateX(6px)  rotate(3deg); }
+  100% { transform: translateX(26px) rotate(12deg);  opacity: 0; }
+}
+
+/* Rivets glow when the seal breaks */
+.unit5-intro.is-opening .unit5-intro__rivet {
+  background: radial-gradient(circle, #ffd58a 0%, #b8240a 80%);
+  box-shadow: 0 0 10px rgba(255, 196, 120, 0.9);
+  transition: background 400ms ease, box-shadow 400ms ease 600ms;
+}
+
+/* Tomb dolly-zoom + brightness as light floods out */
+.unit5-intro.is-opening .unit5-intro__tomb {
+  filter: brightness(1.5) blur(1px);
+  transform: translate(-50%, -50%) scale(1.08);
+  transition: filter 1200ms ease, transform 1100ms cubic-bezier(0.5, 0, 0.4, 1);
+}
+
+/* Mist rushes inward to suggest "air being sucked out" */
+.unit5-intro.is-opening .unit5-intro__mist--a {
+  animation: unit5-intro-mist-in 1100ms ease-in 80ms 1;
+}
+.unit5-intro.is-opening .unit5-intro__mist--b {
+  animation: unit5-intro-mist-in 1100ms ease-in 200ms 1 reverse;
+}
+@keyframes unit5-intro-mist-in {
+  0%   { transform: translateX(0);   opacity: 1; }
+  100% { transform: translateX(0) scale(1.4); opacity: 0.4; }
+}
+
+/* Volumetric beam pouring from the doorway */
+.unit5-intro__beam {
+  position: absolute;
+  left: 50%;
+  bottom: 26%;
+  width: 130%;
+  height: 220%;
+  transform: translateX(-50%) translateY(0) scaleY(0);
+  transform-origin: 50% 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 196, 120, 0.55) 0%,
+    rgba(255, 140, 50, 0.35) 30%,
+    rgba(184, 30, 30, 0.18) 60%,
+    transparent 100%
+  );
+  filter: blur(14px);
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.unit5-intro.is-opening .unit5-intro__beam {
+  animation: unit5-intro-beam-flare 1300ms cubic-bezier(0.4, 0, 0.5, 1) 350ms forwards;
+}
+@keyframes unit5-intro-beam-flare {
+  0%   { opacity: 0;   transform: translateX(-50%) scaleY(0); }
+  40%  { opacity: 0.9; transform: translateX(-50%) scaleY(0.85); }
+  100% { opacity: 0;   transform: translateX(-50%) scaleY(1.2); }
+}

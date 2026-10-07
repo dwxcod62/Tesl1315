@@ -1,25 +1,38 @@
-import { useEffect, useState } from 'react';
-import Unit4App from './unit-4/Unit4App';
-import Unit5App from './unit-5/Unit5App';
+import { useEffect, useState, lazy, Suspense } from 'react';
+
+const Unit3App = lazy(() => import(/* webpackChunkName: "unit-3" */ './unit-4/Unit4App'));
+const Unit4App = lazy(() => import(/* webpackChunkName: "unit-4" */ './unit-radioactivity/Unit5App'));
+const Unit5App = lazy(() => import(/* webpackChunkName: "unit-5" */ './unit-5/Unit5App'));
 
 const UNITS = [
   {
+    id: 'unit-3',
+    title: 'UNIT 3',
+    subtitle: 'Friendly match rally · Scoreboard · Reasons & Benefits',
+    accent: 'cyan',
+    available: true,
+  },
+  {
     id: 'unit-4',
     title: 'UNIT 4',
-    subtitle: 'Friendly match rally · Scoreboard · Reasons & Benefits',
-    Component: Unit4App,
-    accent: 'cyan',
+    subtitle: 'Natural Radioactivity in Food · Dossier',
+    accent: 'red',
     available: true,
   },
   {
     id: 'unit-5',
     title: 'UNIT 5',
-    subtitle: 'Natural Radioactivity in Food · Dossier',
-    Component: Unit5App,
-    accent: 'red',
+    subtitle: 'Mausoleum of Qin Shi Huang · Terracotta Mystery',
+    accent: 'amber',
     available: true,
   },
 ];
+
+const UNIT_LOADERS = {
+  'unit-3': Unit3App,
+  'unit-4': Unit4App,
+  'unit-5': Unit5App,
+};
 
 function getActiveUnitId() {
   if (typeof window === 'undefined') return null;
@@ -53,16 +66,29 @@ export default function MainMenu() {
   }, []);
 
   if (activeId) {
-    const unit = UNITS.find((u) => u.id === activeId);
+    const UnitView = UNIT_LOADERS[activeId];
     return (
       <div className="unit-page">
         <HomeButton />
-        <unit.Component />
+        <Suspense fallback={<UnitLoading />}>
+          <UnitView />
+        </Suspense>
       </div>
     );
   }
 
   return <UnitGrid units={UNITS} />;
+}
+
+function UnitLoading() {
+  return (
+    <div className="unit-loading" role="status" aria-live="polite">
+      <span className="unit-loading__dot" />
+      <span className="unit-loading__dot" />
+      <span className="unit-loading__dot" />
+      <span className="unit-loading__label">Loading…</span>
+    </div>
+  );
 }
 
 function UnitGrid({ units }) {
