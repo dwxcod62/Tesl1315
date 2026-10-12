@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { PARTS } from './data/parts';
 import PartIcon from './components/PartIcon';
-import Scene from './components/Scene';
+import ThreeScene from './components/ThreeScene';
 import MatrixGlyph from './components/MatrixGlyph';
 import HorrorEffects from './components/HorrorEffects';
-import Intro from './components/Intro';
+import ThreeIntro from './components/ThreeIntro';
 import './styles/mausoleum.css';
 
 export default function Unit5App() {
@@ -34,7 +34,7 @@ export default function Unit5App() {
 
   return (
     <>
-      {!introDone && <Intro onEnter={() => setIntroDone(true)} />}
+      {!introDone && <ThreeIntro onEnter={() => setIntroDone(true)} />}
       <div
         className={`unit5-root ${frightened ? 'is-frightening' : ''} ${introDone ? 'is-revealed' : 'is-hidden'}`}
       >
@@ -57,7 +57,7 @@ export default function Unit5App() {
           <span className="unit5-corner unit5-corner--bl" />
           <span className="unit5-corner unit5-corner--br" />
           <div className="unit5-scene" key={part.id}>
-            <Scene kind={part.scene} />
+            <ThreeScene kind={part.scene} horror={isMystery} className="unit5-three-host" />
           </div>
           <div className="unit5-scene-tag">
             // FIG.{part.code} · {part.title}
