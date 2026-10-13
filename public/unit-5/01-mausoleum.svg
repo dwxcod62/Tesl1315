@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="The Mausoleum of Qin Shi Huang, panoramic sepia illustration">
+  <defs>
+    <linearGradient id="sky1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a1d0d"/>
+      <stop offset="0.55" stop-color="#3b2812"/>
+      <stop offset="1" stop-color="#1a1108"/>
+    </linearGradient>
+    <linearGradient id="ground1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a341a"/>
+      <stop offset="1" stop-color="#1a1108"/>
+    </linearGradient>
+    <linearGradient id="mound1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5a4123"/>
+      <stop offset="1" stop-color="#231606"/>
+    </linearGradient>
+    <radialGradient id="sun1" cx="0.7" cy="0.28" r="0.4">
+      <stop offset="0" stop-color="#d9a85a" stop-opacity="0.55"/>
+      <stop offset="0.6" stop-color="#9a6f30" stop-opacity="0.15"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="hatch1" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+      <line x1="0" y1="0" x2="0" y2="14" stroke="#c9a35a" stroke-width="0.4" stroke-opacity="0.18"/>
+    </pattern>
+  </defs>
+
+  <!-- sky + glow -->
+  <rect width="1600" height="1000" fill="url(#sky1)"/>
+  <rect width="1600" height="1000" fill="url(#sun1)"/>
+
+  <!-- distant mountains -->
+  <path d="M0 520 L120 470 L240 510 L360 460 L480 500 L600 455 L720 495 L840 470 L960 500 L1080 460 L1200 490 L1320 460 L1440 495 L1600 470 L1600 600 L0 600 Z"
+        fill="#2a1d0d" opacity="0.85"/>
+  <path d="M0 560 L160 530 L320 565 L480 525 L640 560 L800 530 L960 560 L1120 525 L1280 555 L1440 530 L1600 555 L1600 620 L0 620 Z"
+        fill="#1f150a" opacity="0.95"/>
+
+  <!-- horizon mist -->
+  <rect y="540" width="1600" height="80" fill="#3b2812" opacity="0.4"/>
+
+  <!-- the burial mound (largest pyramid) -->
+  <path d="M250 600 Q800 280 1350 600 L1350 720 L250 720 Z" fill="url(#mound1)"/>
+  <path d="M250 600 Q800 280 1350 600" fill="none" stroke="#c9a35a" stroke-width="1.2" stroke-opacity="0.7"/>
+  <path d="M250 600 Q800 280 1350 600 L1350 720 L250 720 Z" fill="url(#hatch1)"/>
+  <!-- terraced contour lines on mound -->
+  <path d="M380 600 Q800 360 1220 600" fill="none" stroke="#c9a35a" stroke-width="0.6" stroke-opacity="0.35"/>
+  <path d="M460 600 Q800 400 1140 600" fill="none" stroke="#c9a35a" stroke-width="0.6" stroke-opacity="0.3"/>
+  <path d="M540 600 Q800 440 1060 600" fill="none" stroke="#c9a35a" stroke-width="0.6" stroke-opacity="0.25"/>
+  <path d="M620 600 Q800 480 980 600"  fill="none" stroke="#c9a35a" stroke-width="0.6" stroke-opacity="0.2"/>
+
+  <!-- foreground ground -->
+  <rect y="700" width="1600" height="300" fill="url(#ground1)"/>
+  <rect y="700" width="1600" height="300" fill="url(#hatch1)"/>
+
+  <!-- small pit rectangles (the three known pits) -->
+  <g fill="#0a0805" stroke="#c9a35a" stroke-width="0.8" stroke-opacity="0.6">
+    <rect x="180" y="760" width="240" height="120"/>
+    <rect x="500" y="780" width="320" height="100"/>
+    <rect x="900" y="760" width="240" height="120"/>
+  </g>
+  <!-- a few tiny soldier silhouettes inside pits -->
+  <g fill="#c9a35a" fill-opacity="0.55">
+    <rect x="210" y="800" width="6" height="40"/>
+    <rect x="240" y="800" width="6" height="40"/>
+    <rect x="270" y="800" width="6" height="40"/>
+    <rect x="300" y="800" width="6" height="40"/>
+    <rect x="330" y="800" width="6" height="40"/>
+    <rect x="360" y="800" width="6" height="40"/>
+    <rect x="390" y="800" width="6" height="40"/>
+    <rect x="540" y="820" width="6" height="40"/>
+    <rect x="570" y="820" width="6" height="40"/>
+    <rect x="600" y="820" width="6" height="40"/>
+    <rect x="630" y="820" width="6" height="40"/>
+    <rect x="660" y="820" width="6" height="40"/>
+    <rect x="690" y="820" width="6" height="40"/>
+    <rect x="720" y="820" width="6" height="40"/>
+    <rect x="750" y="820" width="6" height="40"/>
+    <rect x="780" y="820" width="6" height="40"/>
+    <rect x="930" y="800" width="6" height="40"/>
+    <rect x="960" y="800" width="6" height="40"/>
+    <rect x="990" y="800" width="6" height="40"/>
+    <rect x="1020" y="800" width="6" height="40"/>
+    <rect x="1050" y="800" width="6" height="40"/>
+    <rect x="1080" y="800" width="6" height="40"/>
+    <rect x="1110" y="800" width="6" height="40"/>
+  </g>
+
+  <!-- compass / scale bar overlay (archaeological feel) -->
+  <g stroke="#c9a35a" stroke-width="1" fill="#c9a35a" font-family="Courier New, monospace" font-size="14" letter-spacing="2">
+    <line x1="60" y1="940" x2="220" y2="940"/>
+    <line x1="60" y1="934" x2="60" y2="946"/>
+    <line x1="140" y1="934" x2="140" y2="946"/>
+    <line x1="220" y1="934" x2="220" y2="946"/>
+    <text x="60" y="924" fill-opacity="0.8">0</text>
+    <text x="135" y="924" fill-opacity="0.8">1 km</text>
+    <text x="210" y="924" fill-opacity="0.8">2</text>
+  </g>
+  <g stroke="#c9a35a" stroke-width="0.6" fill="#c9a35a" fill-opacity="0.6">
+    <circle cx="1540" cy="930" r="32" fill="none"/>
+    <line x1="1540" y1="898" x2="1540" y2="962"/>
+    <line x1="1508" y1="930" x2="1572" y2="930"/>
+    <text x="1532" y="888" font-family="Courier New, monospace" font-size="10" letter-spacing="2" fill="#c9a35a">N</text>
+  </g>
+</svg>

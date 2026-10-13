@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Terracotta Army, rows of clay soldiers, sepia illustration">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#241608"/>
+      <stop offset="1" stop-color="#0d0804"/>
+    </linearGradient>
+    <linearGradient id="floor2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5a4123"/>
+      <stop offset="1" stop-color="#1a1108"/>
+    </linearGradient>
+    <linearGradient id="soldier" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8a6332"/>
+      <stop offset="0.5" stop-color="#5e4321"/>
+      <stop offset="1" stop-color="#2e1f0c"/>
+    </linearGradient>
+    <linearGradient id="soldierB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a07a3e"/>
+      <stop offset="1" stop-color="#3a2812"/>
+    </linearGradient>
+    <radialGradient id="spot2" cx="0.5" cy="0.4" r="0.55">
+      <stop offset="0" stop-color="#d9a85a" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="brick2" width="36" height="22" patternUnits="userSpaceOnUse">
+      <rect width="36" height="22" fill="#2e1f0c"/>
+      <line x1="0" y1="0" x2="0" y2="22" stroke="#0a0805" stroke-width="1"/>
+      <line x1="0" y1="0" x2="36" y2="0" stroke="#0a0805" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#bg2)"/>
+  <rect width="1600" height="1000" fill="url(#spot2)"/>
+
+  <!-- pit walls (brick pattern, perspective) -->
+  <polygon points="0,300 1600,300 1600,1000 0,1000" fill="url(#brick2)" opacity="0.65"/>
+  <polygon points="0,300 1600,300 1450,260 150,260" fill="#1a1108"/>
+  <!-- pit floor -->
+  <polygon points="100,820 1500,820 1500,1000 100,1000" fill="url(#floor2)"/>
+  <polygon points="100,820 1500,820 1500,1000 100,1000" fill="#000" opacity="0.2"/>
+
+  <!-- a clay-horse at front-left, larger -->
+  <g transform="translate(180,640)">
+    <ellipse cx="100" cy="120" rx="110" ry="42" fill="url(#soldierB)"/>
+    <rect x="35" y="150" width="14" height="60" fill="url(#soldierB)"/>
+    <rect x="80" y="150" width="14" height="60" fill="url(#soldierB)"/>
+    <rect x="125" y="150" width="14" height="60" fill="url(#soldierB)"/>
+    <rect x="170" y="150" width="14" height="60" fill="url(#soldierB)"/>
+    <!-- neck + head -->
+    <path d="M180 100 Q220 60 250 70 L260 90 Q230 110 200 120 Z" fill="url(#soldierB)"/>
+    <circle cx="258" cy="78" r="6" fill="#0a0805"/>
+  </g>
+
+  <!-- rows of soldiers, perspective: front row big, back row tiny -->
+  <g id="rows2">
+    <!-- row 1 (front, y=560) -->
+    <g transform="translate(380,560)">
+      <use href="#soldierBase" x="0"/>
+      <use href="#soldierBase" x="90"/>
+      <use href="#soldierBase" x="180"/>
+      <use href="#soldierBase" x="270"/>
+      <use href="#soldierBase" x="360"/>
+      <use href="#soldierBase" x="450"/>
+      <use href="#soldierBase" x="540"/>
+      <use href="#soldierBase" x="630"/>
+      <use href="#soldierBase" x="720"/>
+      <use href="#soldierBase" x="810"/>
+      <use href="#soldierBase" x="900"/>
+    </g>
+    <!-- row 2 (y=480) -->
+    <g transform="translate(420,480) scale(0.78)">
+      <use href="#soldierBase" x="0"/>
+      <use href="#soldierBase" x="90"/>
+      <use href="#soldierBase" x="180"/>
+      <use href="#soldierBase" x="270"/>
+      <use href="#soldierBase" x="360"/>
+      <use href="#soldierBase" x="450"/>
+      <use href="#soldierBase" x="540"/>
+      <use href="#soldierBase" x="630"/>
+      <use href="#soldierBase" x="720"/>
+      <use href="#soldierBase" x="810"/>
+    </g>
+    <!-- row 3 (y=420) -->
+    <g transform="translate(470,420) scale(0.6)">
+      <use href="#soldierBase" x="0"/>
+      <use href="#soldierBase" x="90"/>
+      <use href="#soldierBase" x="180"/>
+      <use href="#soldierBase" x="270"/>
+      <use href="#soldierBase" x="360"/>
+      <use href="#soldierBase" x="450"/>
+      <use href="#soldierBase" x="540"/>
+      <use href="#soldierBase" x="630"/>
+      <use href="#soldierBase" x="720"/>
+    </g>
+    <!-- row 4 (y=380) -->
+    <g transform="translate(520,380) scale(0.45)">
+      <use href="#soldierBase" x="0"/>
+      <use href="#soldierBase" x="90"/>
+      <use href="#soldierBase" x="180"/>
+      <use href="#soldierBase" x="270"/>
+      <use href="#soldierBase" x="360"/>
+      <use href="#soldierBase" x="450"/>
+      <use href="#soldierBase" x="540"/>
+      <use href="#soldierBase" x="630"/>
+    </g>
+  </g>
+
+  <!-- reusable soldier symbol -->
+  <symbol id="soldierBase" viewBox="0 0 80 220" overflow="visible">
+    <!-- legs -->
+    <rect x="20" y="160" width="14" height="60" fill="url(#soldier)"/>
+    <rect x="46" y="160" width="14" height="60" fill="url(#soldier)"/>
+    <!-- body / armour -->
+    <path d="M10 80 L70 80 L74 170 L6 170 Z" fill="url(#soldier)"/>
+    <!-- shoulder plates -->
+    <path d="M6 80 L-2 110 L18 110 L18 80 Z" fill="url(#soldierB)"/>
+    <path d="M74 80 L82 110 L62 110 L62 80 Z" fill="url(#soldierB)"/>
+    <!-- neck -->
+    <rect x="30" y="60" width="20" height="20" fill="url(#soldier)"/>
+    <!-- head -->
+    <ellipse cx="40" cy="42" rx="18" ry="22" fill="url(#soldierB)"/>
+    <!-- topknot -->
+    <ellipse cx="40" cy="20" rx="10" ry="8" fill="#0a0805"/>
+    <rect x="37" y="10" width="6" height="12" fill="#0a0805"/>
+    <!-- spear in hand -->
+    <line x1="68" y1="100" x2="78" y2="-20" stroke="#c9a35a" stroke-width="1.6" stroke-opacity="0.7"/>
+  </symbol>
+
+  <!-- scale / coords overlay -->
+  <g font-family="Courier New, monospace" font-size="12" letter-spacing="2" fill="#c9a35a" fill-opacity="0.7">
+    <text x="40" y="40">N 34°23′  E 109°16′</text>
+    <text x="40" y="60">PIT 1 · 230×62 m</text>
+  </g>
+  <g stroke="#c9a35a" stroke-width="0.8" fill="#c9a35a" font-family="Courier New, monospace" font-size="11" letter-spacing="2" fill-opacity="0.7">
+    <line x1="1380" y1="940" x2="1540" y2="940"/>
+    <line x1="1380" y1="934" x2="1380" y2="946"/>
+    <line x1="1540" y1="934" x2="1540" y2="946"/>
+    <text x="1370" y="924">0</text>
+    <text x="1450" y="924">10 m</text>
+  </g>
+</svg>

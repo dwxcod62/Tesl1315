@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Panoramic view of the terracotta army, three figures in the foreground, sepia illustration">
+  <defs>
+    <linearGradient id="bg5" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a1d0d"/>
+      <stop offset="0.5" stop-color="#1a0e06"/>
+      <stop offset="1" stop-color="#0a0805"/>
+    </linearGradient>
+    <linearGradient id="soldierA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a07a3e"/>
+      <stop offset="0.5" stop-color="#6f4d24"/>
+      <stop offset="1" stop-color="#3a2812"/>
+    </linearGradient>
+    <linearGradient id="soldierD" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6a4d28"/>
+      <stop offset="1" stop-color="#1a1108"/>
+    </linearGradient>
+    <radialGradient id="spot5" cx="0.5" cy="0.5" r="0.65">
+      <stop offset="0" stop-color="#d9a85a" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <symbol id="soldier5" viewBox="0 0 100 280" overflow="visible">
+      <rect x="26" y="200" width="16" height="80" fill="currentColor"/>
+      <rect x="58" y="200" width="16" height="80" fill="currentColor"/>
+      <path d="M14 100 L86 100 L92 220 L8 220 Z" fill="currentColor"/>
+      <path d="M8 100 L-2 140 L20 140 L20 100 Z" fill="currentColor"/>
+      <path d="M92 100 L102 140 L80 140 L80 100 Z" fill="currentColor"/>
+      <rect x="36" y="76" width="28" height="26" fill="currentColor"/>
+      <ellipse cx="50" cy="50" rx="24" ry="30" fill="currentColor"/>
+      <ellipse cx="50" cy="22" rx="14" ry="10" fill="#1a1108"/>
+      <rect x="46" y="10" width="8" height="14" fill="#1a1108"/>
+      <line x1="86" y1="120" x2="100" y2="-20" stroke="#c9a35a" stroke-width="1.6" stroke-opacity="0.7"/>
+    </symbol>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#bg5)"/>
+  <rect width="1600" height="1000" fill="url(#spot5)"/>
+
+  <!-- distant rows (tiny silhouettes in mist) -->
+  <g fill="#3a2812" opacity="0.8">
+    <g transform="translate(60,540)">
+      <use href="#soldier5" x="0"   width="40" height="120" color="#3a2812"/>
+      <use href="#soldier5" x="50"  width="40" height="120" color="#3a2812"/>
+      <use href="#soldier5" x="100" width="40" height="120" color="#3a2812"/>
+      <use href="#soldier5" x="150" width="40" height="120" color="#3a2812"/>
+      <use href="#soldier5" x="200" width="40" height="120" color="#3a2812"/>
+      <use href="#soldier5" x="250" width="40" height="120" color="#3a2812"/>
+      <use href="#soldier5" x="300" width="40" height="120" color="#3a2812"/>
+      <use href="#soldier5" x="350" width="40" height="120" color="#3a2812"/>
+    </g>
+    <g transform="translate(900,540)">
+      <use href="#soldier5" x="0"   width="40" height="120" color="#3a2812"/>
+      <use href="#soldier5" x="50"  width="40" height="120" color="#3a2812"/>
+      <use href="#soldier5" x="100" width="40" height="120" color="#3a2812"/>
+      <use href="#soldier5" x="150" width="40" height="120" color="#3a2812"/>
+      <use href="#soldier5" x="200" width="40" height="120" color="#3a2812"/>
+      <use href="#soldier5" x="250" width="40" height="120" color="#3a2812"/>
+      <use href="#soldier5" x="300" width="40" height="120" color="#3a2812"/>
+      <use href="#soldier5" x="350" width="40" height="120" color="#3a2812"/>
+    </g>
+  </g>
+
+  <!-- mid rows -->
+  <g>
+    <g transform="translate(180,640)" color="#5a4123">
+      <use href="#soldier5" x="0"   width="50" height="160"/>
+      <use href="#soldier5" x="60"  width="50" height="160"/>
+      <use href="#soldier5" x="120" width="50" height="160"/>
+      <use href="#soldier5" x="180" width="50" height="160"/>
+      <use href="#soldier5" x="240" width="50" height="160"/>
+      <use href="#soldier5" x="300" width="50" height="160"/>
+    </g>
+    <g transform="translate(880,640)" color="#5a4123">
+      <use href="#soldier5" x="0"   width="50" height="160"/>
+      <use href="#soldier5" x="60"  width="50" height="160"/>
+      <use href="#soldier5" x="120" width="50" height="160"/>
+      <use href="#soldier5" x="180" width="50" height="160"/>
+      <use href="#soldier5" x="240" width="50" height="160"/>
+      <use href="#soldier5" x="300" width="50" height="160"/>
+    </g>
+  </g>
+
+  <!-- 3 hero figures in foreground -->
+  <g transform="translate(440,580)" color="#a07a3e">
+    <use href="#soldier5" x="0"   width="100" height="320"/>
+    <use href="#soldier5" x="160" width="100" height="320"/>
+    <use href="#soldier5" x="320" width="100" height="320"/>
+  </g>
+  <g transform="translate(940,580)" color="#8a6332">
+    <use href="#soldier5" x="0"   width="100" height="320"/>
+  </g>
+
+  <!-- floor / pit floor reflection -->
+  <rect y="900" width="1600" height="100" fill="#1a1108" opacity="0.5"/>
+
+  <!-- ground mist -->
+  <ellipse cx="800" cy="920" rx="900" ry="20" fill="#c9a35a" opacity="0.1"/>
+
+  <!-- coords -->
+  <g font-family="Courier New, monospace" font-size="12" letter-spacing="2" fill="#c9a35a" fill-opacity="0.7">
+    <text x="40" y="40">PIT 1 · OVERVIEW · c. 210 BCE</text>
+    <text x="40" y="60">8,000+ FIGURES · ARCHAEOLOGICAL RECORD</text>
+  </g>
+  <g font-family="Courier New, monospace" font-size="11" letter-spacing="2" fill="#c9a35a" fill-opacity="0.7">
+    <text x="1280" y="940">UNEARTHED 1974 · XI'AN</text>
+  </g>
+</svg>

@@ -1,23 +1,51 @@
 import { useEffect, useState } from 'react';
 import { PARTS } from './data/parts';
-import PartIcon from './components/PartIcon';
-import ThreeScene from './components/ThreeScene';
+import ThreeIntro from './components/ThreeIntro';
 import MatrixGlyph from './components/MatrixGlyph';
 import HorrorEffects from './components/HorrorEffects';
-import ThreeIntro from './components/ThreeIntro';
+import AnnotatedStage from './components/AnnotatedStage';
 import './styles/mausoleum.css';
 
 export default function Unit5App() {
   const [index, setIndex] = useState(0);
   const [introDone, setIntroDone] = useState(false);
+  const [introFading, setIntroFading] = useState(false);
   const part = PARTS[index];
   const isFirst = index === 0;
   const isLast = index === PARTS.length - 1;
   const isMystery = part.id === 'mystery';
+  const isThanks = part.id === 'reflection';
   const [frightened, setFrightened] = useState(false);
+  const [closing, setClosing] = useState(null); // null | 'active' | 'glitch' | 'off'
 
   const goPrev = () => setIndex((i) => Math.max(0, i - 1));
   const goNext = () => setIndex((i) => Math.min(PARTS.length - 1, i + 1));
+
+  // Reset any in-flight closing state when leaving Part 5.
+  useEffect(() => {
+    if (!isThanks) setClosing(null);
+  }, [isThanks]);
+
+  // Part 5 closing sequence:
+  //   0.0s   text on stage
+  //   3.4s   letters diverge outward (handled inside ThanksScreen)
+  //   4.4s   blackout (root → black, all UI fades)
+  //   4.5s   analog glitch overlay fires
+  //   6.7s   glitch clears, screen stays black forever
+  useEffect(() => {
+    if (!isThanks) return;
+    const t1 = setTimeout(() => setClosing('active'), 4400);
+    const t2 = setTimeout(() => setClosing('glitch'), 4500);
+    const t3 = setTimeout(() => setClosing('off'),    6700);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, [isThanks]);
+
+  // Smoothly fade the cinematic intro out before the unit body
+  // mounts. Avoids a hard visual cut between globe and the terminal.
+  const handleEnter = () => {
+    setIntroFading(true);
+    setTimeout(() => setIntroDone(true), 700);
+  };
 
   // Listen for the frame-slide effect and toggle the scene-frame class.
   useEffect(() => {
@@ -32,11 +60,31 @@ export default function Unit5App() {
     return () => window.removeEventListener('unit5:horror', handler);
   }, [isMystery]);
 
+  // Keyboard navigation (left/right arrows).
+  useEffect(() => {
+    const onKey = (e) => {
+      if (!introDone) return;
+      if (e.key === 'ArrowLeft' && !isFirst) goPrev();
+      else if (e.key === 'ArrowRight' && !isLast) goNext();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [introDone, isFirst, isLast]);
+
   return (
     <>
-      {!introDone && <ThreeIntro onEnter={() => setIntroDone(true)} />}
+      {!introDone && (
+        <div className={introFading ? 'unit5-intro-wrap is-fading' : 'unit5-intro-wrap'}>
+          <ThreeIntro onEnter={handleEnter} />
+        </div>
+      )}
       <div
-        className={`unit5-root ${frightened ? 'is-frightening' : ''} ${introDone ? 'is-revealed' : 'is-hidden'}`}
+        className={
+          `unit5-root ${frightened ? 'is-frightening' : ''} ${introDone ? 'is-revealed' : 'is-hidden'} ` +
+          (closing === 'active' || closing === 'glitch' || closing === 'off' ? 'is-thanks-active ' : '') +
+          (closing === 'glitch' ? 'is-thanks-glitch ' : '') +
+          (closing === 'off' ? 'is-thanks-glitch-off' : '')
+        }
       >
       <div className="unit5-crt" aria-hidden="true" />
       <div className="unit5-crt--glow" aria-hidden="true" />
@@ -48,36 +96,12 @@ export default function Unit5App() {
         <h1 className="unit5-title">MAUSOLEUM OF QIN SHI HUANG</h1>
       </header>
 
-      <div className="unit5-stage-wrap">
-        <span className="unit5-stage-stamp">{part.stamp || 'SEALED · 221 BCE'}</span>
-
-        <div className={`unit5-scene-frame ${frightened ? 'is-frightened' : ''}`}>
-          <span className="unit5-corner unit5-corner--tl" />
-          <span className="unit5-corner unit5-corner--tr" />
-          <span className="unit5-corner unit5-corner--bl" />
-          <span className="unit5-corner unit5-corner--br" />
-          <div className="unit5-scene" key={part.id}>
-            <ThreeScene kind={part.scene} horror={isMystery} className="unit5-three-host" />
-          </div>
-          <div className="unit5-scene-tag">
-            // FIG.{part.code} · {part.title}
-          </div>
-        </div>
-      </div>
-
-      <section className="unit5-info" key={`info-${part.id}`}>
-        <div className="unit5-info-head">
-          <PartIcon kind={part.icon} size={42} />
-          <div>
-            <div className="unit5-info-code">FILE / {part.code} / 05</div>
-            <h2 className="unit5-info-title">{part.title}</h2>
-            <div className="unit5-info-caption">{part.caption}</div>
-          </div>
-        </div>
-
-        <p className="unit5-info-line1">{part.line1}</p>
-        <p className="unit5-info-line2">{part.line2}</p>
-      </section>
+      {/* The annotated investigation terminal. ALL slide content
+          — title, caption, tagline, and details — lives in the
+          connected panels above. The big info card below the image
+          has been removed; the header panel at the bottom of the
+          stage replaces it. */}
+      <AnnotatedStage part={part} />
 
       <nav className="unit5-nav" aria-label="Part navigation">
         <button
@@ -91,7 +115,7 @@ export default function Unit5App() {
         </button>
 
         <div className="unit5-dots" role="tablist">
-          {PARTS.map((p, i) => (
+          {PARTS.map((p, i) => p.hiddenInNav ? null : (
             <button
               key={p.id}
               type="button"
@@ -117,9 +141,11 @@ export default function Unit5App() {
         </button>
       </nav>
 
-      <footer className="unit5-foot">
-        </footer>
-    </div>
+      <footer className="unit5-foot" />
+
+      {/* Analog glitch overlay for the Part 5 closing sequence. */}
+      <div className="unit5-thanks-glitch" aria-hidden="true" />
+      </div>
     </>
   );
 }

@@ -61,9 +61,9 @@
 
 .unit5-matrix {
   position: relative;
-  margin: 0 auto 10px;
+  margin: 0 auto 8px;
   width: min(820px, 100%);
-  height: 96px;
+  height: 72px;
   border: 1px solid #6e5727;
   background:
     radial-gradient(ellipse at center, rgba(40, 28, 12, 0.6) 0%, rgba(10, 8, 5, 0.95) 100%);
@@ -109,9 +109,9 @@
 }
 
 .unit5-title {
-  margin: 10px 0 4px;
-  font-size: clamp(26px, 3.2vw, 44px);
-  letter-spacing: 8px;
+  margin: 6px 0 0;
+  font-size: clamp(22px, 2.6vw, 34px);
+  letter-spacing: 6px;
   color: #f4e0a8;
   font-family: 'Cinzel', Georgia, serif;
   font-weight: 700;
@@ -130,35 +130,30 @@
   font-style: italic;
 }
 
-/* ---------- Stage wrap (the scene frame) ---------- */
-.unit5-stage-wrap {
+/* ---------- Annotated stage (archaeological investigation terminal) ---
+   Grid layout:
+        [left rail] [photo + markers + connectors] [right rail]
+        [    full-width bottom rail: title card    ]
+   - Markers are absolutely positioned in % of the photo (px computed in JS)
+   - Connector lines live in an SVG overlay sized to the photo
+   - On desktop ≥ 1100px: photo takes ~70% of stage width.
+-------------------------------------------------------------------------- */
+.unit5-stage {
   position: relative;
   z-index: 2;
-  margin: 0 auto;
-  width: min(820px, 100%);
+  margin: 6px auto 0;
+  width: min(1500px, 100%);
   display: flex;
   flex-direction: column;
+  gap: clamp(8px, 1.2vh, 16px);
   align-items: stretch;
+  /* Take whatever vertical space the root grid gives us, but never
+     exceed it — this lets the photo shrink to fit the viewport. */
+  min-height: 0;
+  max-height: 100%;
 }
 
-.unit5-stage-stamp {
-  position: absolute;
-  right: 0;
-  top: -10px;
-  font-size: 13px;
-  letter-spacing: 3px;
-  color: #b85a3a;
-  border: 1px solid #6e2a1a;
-  padding: 5px 11px;
-  background: rgba(40, 10, 6, 0.6);
-  font-family: 'Cinzel', Georgia, serif;
-  font-weight: 600;
-  text-transform: uppercase;
-  transform: rotate(-3deg);
-  transform-origin: top right;
-}
-
-.unit5-scene-frame {
+.unit5-stage-frame {
   position: relative;
   border: 2px solid #6e5727;
   background: rgba(14, 10, 5, 0.85);
@@ -170,6 +165,12 @@
     0 8px 0 -2px rgba(0, 0, 0, 0.7);
   display: grid;
   gap: 8px;
+  min-width: 0;
+  min-height: 0;
+  /* Frame shrinks to whatever space the stage leaves after the
+     info panel below takes its natural height. */
+  flex: 1 1 auto;
+  max-height: 100%;
 }
 
 .unit5-corner {
@@ -177,35 +178,563 @@
   width: 14px;
   height: 14px;
   border: 2px solid #f4e0a8;
-  z-index: 1;
+  z-index: 4;
+  pointer-events: none;
 }
 .unit5-corner--tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
 .unit5-corner--tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
 .unit5-corner--bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
 .unit5-corner--br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
 
-.unit5-scene {
+.unit5-stage-photo-wrap {
   position: relative;
   width: 100%;
+  /* Default aspect ratio; replaced by JS-driven min-height:0 below
+     so the photo actually fits the available stage height. */
   aspect-ratio: 16 / 10;
   background: #0a0805;
   border: 1px solid #3a2a14;
   overflow: hidden;
-  animation: unit5WipeIn 320ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  min-height: 0;
+  max-height: 100%;
+  /* The photo starts at scale 1.02 / opacity 0 — animated in on mount. */
 }
 
-/* Three.js scene host + canvas */
-.unit5-three-host {
+.unit5-stage-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: sepia(0.18) contrast(1.05) saturate(0.92);
+  will-change: transform, opacity;
+}
+
+.unit5-stage-svg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  pointer-events: none;
+  overflow: visible;
 }
-.unit5-three-canvas {
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
+
+/* The stepped connector path. Drawn from marker → trunk x → panel
+   edge. stroke-dashoffset is animated by GSAP for the draw-in
+   effect. */
+.unit5-connector-path {
+  stroke: #c9a35a;
+  stroke-width: 2.5;
+  stroke-opacity: 0.95;
+  fill: none;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  transition: stroke 0.25s ease, stroke-width 0.25s ease, stroke-opacity 0.25s ease;
+  will-change: stroke-dashoffset, opacity;
 }
+/* The vertical "trunk" segment of the stepped path — slightly
+   lighter so the bend reads as a schematic corner. */
+.unit5-connector-trunk {
+  stroke: rgba(201, 163, 90, 0.65);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 4;
+  transition: stroke 0.25s ease, stroke-opacity 0.25s ease;
+}
+/* Small circle anchor on the photo side (where the marker sits). */
+.unit5-connector-anchor {
+  fill: #0a0805;
+  stroke: #c9a35a;
+  stroke-width: 1.8;
+  transition: all 0.25s ease;
+}
+/* Endpoint node on the panel edge. */
+.unit5-connector-end {
+  fill: #c9a35a;
+  opacity: 0.95;
+  transition: all 0.25s ease;
+  will-change: transform, opacity;
+}
+
+.unit5-anno-group.is-active .unit5-connector-path {
+  stroke: #f4e0a8;
+  stroke-width: 3;
+  stroke-opacity: 1;
+  filter: drop-shadow(0 0 6px rgba(255, 195, 90, 0.8));
+}
+.unit5-anno-group.is-dragging .unit5-connector-path {
+  stroke: #fff8e0;
+  stroke-width: 3;
+  stroke-opacity: 1;
+  filter: drop-shadow(0 0 8px rgba(255, 245, 210, 0.9));
+}
+.unit5-anno-group.is-dragging .unit5-connector-end {
+  fill: #fff8e0;
+  r: 7;
+  filter: drop-shadow(0 0 8px rgba(255, 248, 224, 0.9));
+}
+.unit5-anno-group.is-dragging .unit5-connector-anchor {
+  fill: #fff8e0;
+  stroke: #fff8e0;
+}
+
+.unit5-anno-group.is-active .unit5-connector-trunk {
+  stroke: rgba(244, 224, 168, 0.9);
+  stroke-opacity: 1;
+}
+.unit5-anno-group.is-active .unit5-connector-anchor {
+  fill: #f4e0a8;
+  stroke: #f4e0a8;
+  stroke-width: 2;
+}
+.unit5-anno-group.is-active .unit5-connector-end {
+  fill: #f4e0a8;
+  r: 6;
+  filter: drop-shadow(0 0 6px rgba(255, 195, 90, 0.9));
+}
+
+/* Per-variant connector tints (for evidence we keep the gold but
+   the panel itself carries the red stamp). */
+
+/* Markers — gold pin with crosshair, pulse ring, number badge. */
+.unit5-anno-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: grab;
+  color: #c9a35a;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  z-index: 5;
+  will-change: transform, opacity;
+  touch-action: none; /* prevent scroll while dragging on touch */
+}
+
+/* Outer crosshair — 4 short strokes, gives the technical / survey feel */
+.unit5-anno-marker__crosshair {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.unit5-anno-marker__crosshair span {
+  position: absolute;
+  background: #c9a35a;
+  transition: background 0.25s ease;
+}
+.unit5-anno-marker__crosshair span:nth-child(1) { top: 0; left: 50%; width: 1.5px; height: 8px; transform: translateX(-50%); }
+.unit5-anno-marker__crosshair span:nth-child(2) { bottom: 0; left: 50%; width: 1.5px; height: 8px; transform: translateX(-50%); }
+.unit5-anno-marker__crosshair span:nth-child(3) { left: 0; top: 50%; width: 8px; height: 1.5px; transform: translateY(-50%); }
+.unit5-anno-marker__crosshair span:nth-child(4) { right: 0; top: 50%; width: 8px; height: 1.5px; transform: translateY(-50%); }
+
+.unit5-anno-marker__ring {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  border: 1.8px solid #c9a35a;
+  background: rgba(10, 8, 5, 0.82);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.6) inset,
+    0 0 10px rgba(201, 163, 90, 0.4);
+  transition: all 0.25s ease;
+}
+.unit5-anno-marker__core {
+  position: absolute;
+  inset: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #f4e0a8 0%, #c9a35a 60%, #5a4123 100%);
+  box-shadow: 0 0 5px rgba(255, 195, 90, 0.55);
+  transition: all 0.25s ease;
+}
+.unit5-anno-marker__num {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f4e0a8;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 1px;
+  z-index: 1;
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.95),
+    0 0 3px rgba(0, 0, 0, 0.7);
+}
+
+.unit5-anno-marker:hover .unit5-anno-marker__ring,
+.unit5-anno-marker:focus-visible .unit5-anno-marker__ring,
+.unit5-anno-marker.is-active .unit5-anno-marker__ring {
+  border-color: #f4e0a8;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.6) inset,
+    0 0 14px rgba(255, 195, 90, 0.85);
+  transform: scale(1.12);
+}
+.unit5-anno-marker.is-active .unit5-anno-marker__core {
+  background: radial-gradient(circle, #fff 0%, #f4e0a8 60%, #c9a35a 100%);
+  box-shadow: 0 0 10px rgba(255, 195, 90, 0.85);
+}
+.unit5-anno-marker.is-active .unit5-anno-marker__crosshair span { background: #f4e0a8; }
+
+/* Dragging: stronger glow + scale up, cursor swap */
+.unit5-anno-marker.is-dragging {
+  cursor: grabbing !important;
+}
+.unit5-anno-marker.is-dragging .unit5-anno-marker__ring {
+  border-color: #fff5d6;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.3) inset,
+    0 0 22px rgba(255, 245, 210, 0.85),
+    0 0 40px rgba(255, 245, 210, 0.4);
+  transform: scale(1.18);
+}
+.unit5-anno-marker.is-dragging .unit5-anno-marker__core {
+  background: radial-gradient(circle, #ffffff 0%, #fff8e0 50%, #f4e0a8 100%);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.85), 0 0 22px rgba(255, 240, 200, 0.55);
+}
+.unit5-anno-marker.is-dragging .unit5-anno-marker__crosshair span {
+  background: #fff8e0;
+}
+
+/* Evidence variant — red accent on the marker so it visually pairs
+   with the red UNVERIFIED stamp on the panel. */
+.unit5-marker-evidence .unit5-anno-marker__ring { border-color: #c66a3a; }
+.unit5-marker-evidence .unit5-anno-marker__core {
+  background: radial-gradient(circle, #e89a6a 0%, #b85a3a 60%, #5a2a14 100%);
+}
+.unit5-marker-evidence:hover .unit5-anno-marker__ring,
+.unit5-marker-evidence.is-active .unit5-anno-marker__ring {
+  border-color: #e89a6a;
+  box-shadow: 0 0 12px rgba(232, 154, 106, 0.7);
+}
+.unit5-marker-evidence .unit5-anno-marker__crosshair span { background: #c66a3a; }
+
+@keyframes unit5MarkerPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(201, 163, 90, 0.55); }
+  70%  { box-shadow: 0 0 0 12px rgba(201, 163, 90, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(201, 163, 90, 0); }
+}
+.unit5-anno-marker::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: unit5MarkerPulse 2.4s ease-out infinite;
+}
+.unit5-anno-marker.is-active::after { animation: none; }
+
+/* All panels are always visible by default — no dim on hover.
+   The pinned state is the only "focus" state and only brightens
+   the chosen panel, leaving the others at full opacity. */
+.unit5-stage .unit5-anno-panel { transition: border-color 0.25s ease, box-shadow 0.25s ease; }
+.unit5-anno-panel.is-active {
+  opacity: 1;
+  filter: none;
+  box-shadow:
+    0 0 0 1px rgba(244, 224, 168, 0.6) inset,
+    0 0 24px -4px rgba(255, 195, 90, 0.45),
+    0 18px 40px -20px rgba(0, 0, 0, 0.7);
+  border-color: rgba(244, 224, 168, 0.7);
+}
+
+/* ============================================================
+   Annotation panel — 4 distinct visual variants
+   All share: dark/gold palette, gold border, ref badge.
+   Variants: archival (default) · technical · evidence · compact
+   ============================================================ */
+
+.unit5-anno-panel {
+  position: relative;
+  font-family: 'IM Fell English SC', 'Cinzel', Georgia, serif;
+  color: #e8dcc4;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.4) inset,
+    0 14px 30px -18px rgba(0, 0, 0, 0.7);
+  will-change: opacity, transform;
+  transition:
+    opacity 0.25s ease, filter 0.25s ease,
+    border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.unit5-anno-panel--l {
+  border-left: 3px solid #c9a35a;
+  border-right: 1px solid rgba(201, 163, 90, 0.45);
+}
+.unit5-anno-panel--r {
+  border-left: 1px solid rgba(201, 163, 90, 0.45);
+  border-right: 3px solid #c9a35a;
+}
+
+.unit5-anno-panel__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed rgba(201, 163, 90, 0.35);
+}
+.unit5-anno-panel__num {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  letter-spacing: 2.5px;
+  color: #c9a35a;
+  font-weight: 700;
+}
+.unit5-anno-panel__ref {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  letter-spacing: 2.5px;
+  color: #8a7a5a;
+}
+.unit5-anno-panel__title {
+  margin: 8px 0 8px;
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 17px;
+  letter-spacing: 2.5px;
+  color: #f4e0a8;
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+.unit5-anno-panel__body p {
+  margin: 0 0 6px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: #d8c8a4;
+  font-family: 'IM Fell English SC', Georgia, serif;
+}
+.unit5-anno-panel__body p:last-child { margin-bottom: 0; }
+.unit5-anno-panel__foot {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+.unit5-anno-panel__pin {
+  padding: 3px 8px;
+  background: rgba(10, 8, 5, 0.7);
+  border: 1px solid rgba(201, 163, 90, 0.5);
+  color: #c9a35a;
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.unit5-anno-panel__pin:hover { background: rgba(201, 163, 90, 0.15); color: #f4e0a8; }
+.unit5-anno-panel.is-active .unit5-anno-panel__pin {
+  background: #c9a35a;
+  color: #0a0603;
+}
+
+/* ── archival: full dossier card with file-tab fold ─────────── */
+.unit5-anno-panel--archival {
+  background: linear-gradient(180deg,
+    rgba(30, 22, 10, 0.82),
+    rgba(14, 10, 4, 0.92));
+  border: 1px solid rgba(201, 163, 90, 0.45);
+  padding: 16px 18px 18px 20px;
+  min-width: 260px;
+}
+.unit5-anno-panel--archival .unit5-anno-panel__head { margin-bottom: 6px; }
+.unit5-anno-panel--archival .unit5-anno-panel__foot { margin-top: 10px; }
+/* little tab on the photo-facing side */
+.unit5-anno-panel__tab {
+  position: absolute;
+  top: -1px;
+  width: 28px;
+  height: 8px;
+  background: #c9a35a;
+}
+.unit5-anno-panel--l .unit5-anno-panel__tab { right: -1px; }
+.unit5-anno-panel--r .unit5-anno-panel__tab { left: -1px; }
+/* clipped bottom-right corner */
+.unit5-anno-panel__notch {
+  position: absolute;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg, transparent 50%, rgba(0, 0, 0, 0.4) 50%);
+}
+.unit5-anno-panel--l .unit5-anno-panel__notch { right: 0; transform: scaleX(-1); }
+.unit5-anno-panel--r .unit5-anno-panel__notch { left: 0; }
+
+/* ── technical: ruled monospace measurement slab ───────────── */
+.unit5-anno-panel--technical {
+  background:
+    repeating-linear-gradient(0deg,
+      rgba(201, 163, 90, 0.04) 0 1px,
+      transparent 1px 22px),
+    linear-gradient(180deg,
+      rgba(20, 14, 6, 0.95),
+      rgba(10, 8, 5, 0.95));
+  border: 1px solid rgba(201, 163, 90, 0.55);
+  padding: 14px 16px 16px;
+  min-width: 260px;
+}
+.unit5-anno-panel--technical .unit5-anno-panel__head {
+  border-bottom: 1px solid rgba(201, 163, 90, 0.5);
+  margin-bottom: 6px;
+}
+.unit5-anno-panel--technical .unit5-anno-panel__head--mono {
+  flex-direction: row;
+}
+.unit5-anno-panel--technical .unit5-anno-panel__title--mono {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+  font-size: 12px;
+  text-transform: none;
+  color: #f4e0a8;
+}
+.unit5-anno-panel--technical .unit5-anno-panel__ref {
+  color: #c9a35a;
+  font-size: 10px;
+  font-weight: 700;
+}
+.unit5-anno-panel--technical .unit5-anno-panel__num {
+  background: rgba(201, 163, 90, 0.12);
+  padding: 1px 5px;
+  border: 1px solid rgba(201, 163, 90, 0.4);
+}
+.unit5-anno-panel--technical .unit5-anno-panel__ruler {
+  display: flex;
+  justify-content: space-between;
+  margin: 4px 0 6px;
+  padding: 0 2px;
+}
+.unit5-anno-panel--technical .unit5-anno-panel__ruler span {
+  width: 1px;
+  height: 5px;
+  background: rgba(201, 163, 90, 0.5);
+}
+
+/* ── evidence: claim with red "UNVERIFIED" corner stamp ────── */
+.unit5-anno-panel--evidence {
+  background: linear-gradient(180deg,
+    rgba(40, 18, 12, 0.85),
+    rgba(20, 8, 6, 0.92));
+  border: 1px dashed rgba(232, 154, 106, 0.6);
+  border-top: 1px solid rgba(232, 154, 106, 0.7);
+  border-bottom: 1px solid rgba(232, 154, 106, 0.5);
+  padding: 16px 18px 16px 20px;
+  min-width: 260px;
+}
+.unit5-anno-panel--evidence .unit5-anno-panel__head {
+  border-bottom: 1px dashed rgba(232, 154, 106, 0.45);
+}
+.unit5-anno-panel--evidence .unit5-anno-panel__ref { color: #c66a3a; }
+.unit5-anno-panel--evidence .unit5-anno-panel__title { color: #f4d4b0; }
+.unit5-anno-panel--evidence .unit5-anno-panel__body p { color: #d8b89a; }
+.unit5-anno-panel__stamp {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #e89a6a;
+  border: 1px solid #c66a3a;
+  padding: 2px 6px;
+  background: rgba(60, 16, 8, 0.6);
+  transform: rotate(2deg);
+  transform-origin: top right;
+  pointer-events: none;
+}
+.unit5-anno-panel__caution {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(232, 154, 106, 0.35);
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #c66a3a;
+  font-style: italic;
+}
+.unit5-anno-panel__caution span { color: #e89a6a; margin-right: 4px; }
+
+/* ── compact: one-liner slab, no title chrome ──────────────── */
+.unit5-anno-panel--compact {
+  background: rgba(14, 10, 4, 0.9);
+  border: 1px solid rgba(201, 163, 90, 0.5);
+  padding: 10px 14px;
+}
+.unit5-anno-panel__compact {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.unit5-anno-panel__num--inline {
+  font-size: 13px;
+  padding: 2px 6px;
+  background: rgba(201, 163, 90, 0.12);
+  border: 1px solid rgba(201, 163, 90, 0.4);
+  flex-shrink: 0;
+}
+.unit5-anno-panel__compact-body { flex: 1; min-width: 0; }
+.unit5-anno-panel__compact .unit5-anno-panel__title {
+  font-size: 15px;
+  margin: 2px 0 4px;
+  letter-spacing: 1.5px;
+}
+.unit5-anno-panel__compact .unit5-anno-panel__body p { font-size: 14px; line-height: 1.45; }
+.unit5-anno-panel__pin--inline {
+  padding: 1px 5px;
+  font-size: 11px;
+  margin: 0;
+  align-self: flex-start;
+}
+
+/* Active / dimmed states */
+.unit5-stage.has-hover .unit5-anno-panel,
+.unit5-stage.has-pin .unit5-anno-panel { /* transitions defined on base */ }
+.unit5-anno-panel.is-dimmed { opacity: 0.32; filter: saturate(0.5); }
+.unit5-anno-panel.is-active {
+  opacity: 1 !important;
+  filter: none !important;
+  box-shadow:
+    0 0 0 1px rgba(244, 224, 168, 0.6) inset,
+    0 0 28px -4px rgba(255, 195, 90, 0.45),
+    0 18px 40px -20px rgba(0, 0, 0, 0.7) !important;
+  border-color: rgba(244, 224, 168, 0.7) !important;
+}
+
+/* Stage stamp + tag — small text overlays on the photo */
+.unit5-stage-stamp {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: #b85a3a;
+  border: 1px solid #6e2a1a;
+  padding: 3px 8px;
+  background: rgba(40, 10, 6, 0.7);
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  z-index: 2;
+  will-change: opacity, transform;
+}
+
+.unit5-stage-tag {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #c9a35a;
+  background: rgba(20, 14, 6, 0.7);
+  border: 1px solid rgba(201, 163, 90, 0.35);
+  padding: 3px 8px;
+  align-self: end;
+  justify-self: start;
+  will-change: opacity, transform;
+}
+
+/* When a marker is dimmed, the connector and other markers fade too */
+.unit5-stage.has-hover .unit5-anno-marker,
+.unit5-stage.has-pin .unit5-anno-marker { transition: opacity 0.25s ease, filter 0.25s ease; }
 
 @keyframes unit5WipeIn {
   0%   { clip-path: inset(0 100% 0 0); opacity: 0.4; }
@@ -224,77 +753,232 @@
   font-variant: small-caps;
 }
 
-/* ---------- Info (light text block) ---------- */
-.unit5-info {
+/* ============================================================
+   Header variant — slide title card. Replaces the old
+   `.unit5-info` block that used to sit under the image. It
+   lives in the bottom rail of the stage and is connected to a
+   virtual anchor at the bottom-centre of the photo.
+   ============================================================ */
+.unit5-anno-panel--header {
   position: relative;
-  z-index: 2;
-  margin: 0 auto;
-  width: min(820px, 100%);
+  background:
+    radial-gradient(120% 100% at 50% 0%,
+      rgba(40, 28, 12, 0.92) 0%,
+      rgba(14, 10, 4, 0.95) 70%);
+  border: 1px solid rgba(201, 163, 90, 0.6);
+  border-top: 3px solid #c9a35a;
+  padding: 18px 24px 18px 24px;
   display: grid;
-  gap: 10px;
-  animation: unit5FadeUp 280ms ease 80ms both;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "code  title  caption"
+    "line  line   line"
+    "line1 line1  line1"
+    "line2 line2  line2";
+  gap: 6px 16px;
+  align-items: baseline;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.4) inset,
+    0 -10px 30px -16px rgba(255, 195, 90, 0.35),
+    0 18px 40px -20px rgba(0, 0, 0, 0.7);
+  /* top edge gets a small gold notch where the connector meets it */
+  margin-top: 6px;
 }
-
-@keyframes unit5FadeUp {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+.unit5-anno-panel--header::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 6px;
+  background: #f4e0a8;
+  box-shadow: 0 0 8px rgba(255, 195, 90, 0.7);
+  pointer-events: none;
 }
-
-.unit5-info-head {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding-bottom: 8px;
-  border-bottom: 1px dashed #6e5727;
-}
-
-.unit5-info-code {
-  font-size: 13px;
+.unit5-anno-panel--header .unit5-anno-panel__header-code {
+  grid-area: code;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
   letter-spacing: 3px;
-  color: #8a7a5a;
-  font-family: 'Cinzel', Georgia, serif;
-  font-weight: 500;
-  font-variant: small-caps;
+  color: #c9a35a;
+  font-weight: 700;
+  padding-right: 14px;
+  border-right: 1px dashed rgba(201, 163, 90, 0.5);
+  align-self: center;
 }
-
-.unit5-info-title {
-  margin: 4px 0;
-  font-size: clamp(24px, 2.6vw, 36px);
-  letter-spacing: 6px;
-  color: #f4e0a8;
+.unit5-anno-panel--header .unit5-anno-panel__header-title {
+  grid-area: title;
+  margin: 0;
   font-family: 'Cinzel', Georgia, serif;
   font-weight: 700;
   font-variant: small-caps;
+  letter-spacing: 5px;
+  font-size: clamp(20px, 2.4vw, 32px);
+  color: #f4e0a8;
   text-shadow: 2px 2px 0 #1a1206;
+  line-height: 1.1;
 }
-
-.unit5-info-caption {
-  font-size: 13px;
+.unit5-anno-panel--header .unit5-anno-panel__header-caption {
+  grid-area: caption;
+  font-family: 'IM Fell English SC', Georgia, serif;
+  font-style: italic;
+  font-size: 14px;
   letter-spacing: 3px;
   color: #c9a35a;
-  font-family: 'IM Fell English SC', Georgia, serif;
-  font-style: italic;
+  text-align: right;
+  align-self: center;
 }
-
-.unit5-info-line1 {
+.unit5-anno-panel--header .unit5-anno-panel__header-line {
+  grid-area: line;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent, rgba(201, 163, 90, 0.5) 10%, rgba(201, 163, 90, 0.5) 90%, transparent);
+  margin: 4px 0 2px;
+}
+.unit5-anno-panel--header .unit5-anno-panel__header-line1 {
+  grid-area: line1;
   margin: 0;
-  font-size: clamp(15px, 1.5vw, 19px);
-  line-height: 1.65;
-  letter-spacing: 1.6px;
-  color: #f4e0a8;
   font-family: 'IM Fell English SC', Georgia, serif;
   font-variant: small-caps;
+  font-size: clamp(15px, 1.5vw, 19px);
+  line-height: 1.5;
+  letter-spacing: 1.2px;
+  color: #f4e0a8;
 }
-
-.unit5-info-line2 {
+.unit5-anno-panel--header .unit5-anno-panel__header-line2 {
+  grid-area: line2;
   margin: 0;
-  font-size: clamp(14px, 1.25vw, 17px);
-  line-height: 1.65;
-  letter-spacing: 1.4px;
-  color: #b8a07a;
   font-family: 'IM Fell English', Georgia, serif;
   font-style: italic;
+  font-size: clamp(13px, 1.2vw, 16px);
+  line-height: 1.5;
+  letter-spacing: 1px;
+  color: #b8a07a;
 }
+/* Active / hover state for header — light up the whole title block */
+.unit5-anno-panel--header.is-active {
+  border-color: rgba(244, 224, 168, 0.8);
+  box-shadow:
+    0 0 0 1px rgba(244, 224, 168, 0.5) inset,
+    0 -10px 36px -10px rgba(255, 195, 90, 0.55),
+    0 18px 40px -20px rgba(0, 0, 0, 0.7);
+}
+.unit5-anno-panel--header.is-active .unit5-anno-panel__header-title {
+  color: #fff5d6;
+  text-shadow: 2px 2px 0 #1a1206, 0 0 12px rgba(255, 195, 90, 0.45);
+}
+
+/* On small screens, header collapses to a 2-row layout */
+@media (max-width: 720px) {
+  .unit5-anno-panel--header {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "code"
+      "title"
+      "caption"
+      "line"
+      "line1"
+      "line2";
+    text-align: left;
+  }
+  .unit5-anno-panel--header .unit5-anno-panel__header-caption {
+    text-align: left;
+  }
+  .unit5-anno-panel--header .unit5-anno-panel__header-code {
+    border-right: none;
+    padding-right: 0;
+  }
+}
+
+/* ---------- Info panel — single full-width card with stacked rows.
+   Inherits theme from .unit5-anno-panel--header (the parent class)
+   and adds an internal list of annotation rows underneath. */
+.unit5-info-panel {
+  /* The parent .unit5-stage is now a flex column, so this just
+     stretches to full width naturally. The grid-areas below are
+     the same as the header panel (which it extends) plus one
+     extra "list" row at the bottom. */
+  grid-template-areas:
+    "code  title  caption"
+    "line  line   line"
+    "line1 line1  line1"
+    "line2 line2  line2"
+    "list  list   list";
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+}
+
+.unit5-info-panel__list {
+  grid-area: list;
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 14px 0 0;
+  border-top: 1px dashed rgba(201, 163, 90, 0.45);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px 22px;
+}
+
+.unit5-summary-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 10px;
+  padding: 10px 12px 12px;
+  background: rgba(14, 10, 4, 0.6);
+  border: 1px solid rgba(201, 163, 90, 0.3);
+  border-left: 3px solid #c9a35a;
+  font-family: 'IM Fell English SC', Georgia, serif;
+  color: #d8c8a4;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.unit5-summary-row:hover {
+  border-color: rgba(244, 224, 168, 0.7);
+  background: rgba(20, 14, 6, 0.8);
+}
+.unit5-summary-row--archival  { border-left-color: #c9a35a; }
+.unit5-summary-row--technical { border-left-color: #8aa5c9; }
+.unit5-summary-row--evidence  {
+  border-left-color: #c66a3a;
+  background: linear-gradient(180deg,
+    rgba(40, 14, 8, 0.7),
+    rgba(14, 8, 4, 0.85));
+}
+.unit5-summary-row--compact   { border-left-color: #6e8a5a; }
+
+.unit5-info-panel__num {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: #c9a35a;
+  font-weight: 700;
+  align-self: start;
+  padding-top: 2px;
+  text-align: center;
+  border-right: 1px dashed rgba(201, 163, 90, 0.35);
+  padding-right: 8px;
+}
+.unit5-summary-row--evidence .unit5-info-panel__num { color: #e89a6a; }
+
+.unit5-info-panel__title {
+  margin: 0 0 4px;
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  color: #f4e0a8;
+  text-transform: uppercase;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.unit5-info-panel__text p {
+  margin: 0 0 4px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #d8c8a4;
+}
+.unit5-info-panel__text p:last-child { margin-bottom: 0; }
+.unit5-summary-row--evidence .unit5-info-panel__text p { color: #e8c0a8; }
 
 /* ---------- Nav (prev / dots / next) ---------- */
 .unit5-nav {
@@ -423,6 +1107,56 @@
     font-size: 16px;
     letter-spacing: 4px;
   }
+  .unit5-anno-marker::after { animation: none; }
+  .unit5-anno-marker,
+  .unit5-anno-panel,
+  .unit5-connector,
+  .unit5-connector-dot { transition: none !important; }
+}
+
+/* ---------- Responsive: annotated stage ---------- */
+/* On narrow viewports, drop the side rails so the photo and panels
+   stack vertically — connectors and markers are still drawn but the
+   photo becomes the primary visual. */
+@media (max-width: 1100px) {
+  .unit5-stage {
+    grid-template-columns: minmax(220px, 1fr) minmax(0, 2.4fr) minmax(220px, 1fr);
+    width: min(1100px, 100%);
+  }
+}
+@media (max-width: 980px) {
+  .unit5-stage {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "stage"
+      "left"
+      "right"
+      "bot";
+    width: min(720px, 100%);
+  }
+  .unit5-stage-rail--left,
+  .unit5-stage-rail--right {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .unit5-anno-panel {
+    flex: 1 1 240px;
+  }
+  .unit5-stage-svg { display: none; } /* hide SVG lines on mobile */
+}
+
+@media (max-width: 600px) {
+  .unit5-anno-marker { width: 30px; height: 30px; }
+  .unit5-anno-marker__num { font-size: 8px; }
+  .unit5-anno-panel__title { font-size: 12px; }
+  .unit5-anno-panel__body p { font-size: 11px; }
+  .unit5-anno-panel--archival { padding: 10px 12px; }
+  .unit5-anno-panel--evidence { padding: 12px 12px 10px; }
+  .unit5-anno-panel__stamp { font-size: 8px; }
+  .unit5-anno-panel--header { padding: 14px 16px; }
+  .unit5-anno-panel--header .unit5-anno-panel__header-title { font-size: 18px; letter-spacing: 3px; }
+  .unit5-anno-panel--header .unit5-anno-panel__header-caption { font-size: 12px; }
 }
 
 /* ---------- Horror effects (UNOPENED TOMB only) ---------- */
@@ -571,8 +1305,23 @@
 }
 
 /* ================================================================
-   INTRO · TOMB ENTRANCE (start screen)
+   INTRO · EARTH-TO-MAUSOLEUM ZOOM (Cesium + GSAP)
+   Wraps the <EarthZoomIntro /> component and provides a smooth
+   fade-out before the unit body reveals itself.
    ================================================================ */
+.unit5-intro-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  opacity: 1;
+  transition: opacity 700ms ease;
+  pointer-events: auto;
+}
+.unit5-intro-wrap.is-fading {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .unit5-root.is-hidden {
   visibility: hidden;
   pointer-events: none;
@@ -744,3 +1493,476 @@
 }
 
 /* (CSS door-opening keyframes removed — replaced by Three.js animation) */
+
+/* ================================================================
+   INTRO · CINEMATIC EPIC (File 05 — Mausoleum)
+   Black screen · typewriter kicker · hero letter-by-letter ·
+   ENTER button · ramp wipe. Silent. Honors prefers-reduced-motion.
+   ================================================================ */
+.unit5-intro--cinematic {
+  background:
+    radial-gradient(ellipse at 50% 38%, #1a1208 0%, #0a0805 55%, #000 100%);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #e9d6ad;
+  font-family: 'Cinzel', Georgia, serif;
+  animation: unit5IntroFade 600ms ease both;
+}
+.unit5-intro--cinematic.is-leaving { animation: unit5IntroFadeOut 700ms ease both; }
+@keyframes unit5IntroFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes unit5IntroFadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0.85; }
+}
+
+.unit5-intro--cinematic .unit5-intro__grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.12;
+  mix-blend-mode: overlay;
+  background-image:
+    radial-gradient(rgba(255,255,255,0.6) 0.5px, transparent 0.6px),
+    radial-gradient(rgba(255,255,255,0.4) 0.5px, transparent 0.6px);
+  background-size: 3px 3px, 5px 5px;
+  background-position: 0 0, 1px 1px;
+}
+
+.unit5-intro--cinematic .unit5-intro__vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 50%, transparent 35%, rgba(0,0,0,0.65) 100%);
+}
+
+.unit5-intro--cinematic .unit5-intro__scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 200, 120, 0.04) 0 1px,
+      transparent 1px 4px
+    );
+  mix-blend-mode: screen;
+  opacity: 0.6;
+}
+
+/* Kicker line (top of stack) */
+.unit5-intro--cinematic .unit5-intro__kicker {
+  font-family: ui-monospace, Menlo, monospace;
+  letter-spacing: 0.32em;
+  font-size: 11px;
+  color: rgba(196, 158, 102, 0.7);
+  margin: 0 0 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 600ms ease, transform 600ms ease;
+  position: relative;
+  z-index: 2;
+}
+.unit5-intro--cinematic .unit5-intro__kicker.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+.unit5-intro--cinematic .unit5-intro__caret {
+  display: inline-block;
+  animation: unit5IntroBlink 1s steps(2, end) infinite;
+  color: rgba(196, 158, 102, 0.9);
+  font-weight: 700;
+  margin-left: 2px;
+}
+@keyframes unit5IntroBlink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* Hero title — typewriter */
+.unit5-intro--cinematic .unit5-intro__title {
+  margin: 0;
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 600;
+  font-variant: small-caps;
+  letter-spacing: 0.18em;
+  font-size: clamp(28px, 4.2vw, 56px);
+  line-height: 1.18;
+  color: #f4e0a8;
+  text-shadow: 0 0 22px rgba(255, 170, 90, 0.18);
+  max-width: min(92vw, 980px);
+  position: relative;
+  z-index: 2;
+}
+.unit5-intro--cinematic .unit5-intro__title-caret {
+  display: inline-block;
+  margin-left: 4px;
+  color: #c9a35a;
+  font-weight: 400;
+  animation: unit5IntroBlink 0.9s steps(2, end) infinite;
+  transition: opacity 400ms ease;
+}
+.unit5-intro--cinematic .unit5-intro__title-caret.is-hide { opacity: 0; }
+
+/* Sub line — fades in after the typewriter */
+.unit5-intro--cinematic .unit5-intro__sub {
+  margin: 22px 0 0;
+  max-width: min(88vw, 880px);
+  font-family: 'IM Fell English', Georgia, serif;
+  font-style: italic;
+  font-size: clamp(20px, 2vw, 28px);
+  line-height: 1.7;
+  letter-spacing: 0.06em;
+  color: rgba(232, 220, 196, 0.82);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 800ms ease, transform 800ms ease;
+  position: relative;
+  z-index: 2;
+}
+.unit5-intro--cinematic .unit5-intro__sub.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* CTA — enters last */
+.unit5-intro--cinematic .unit5-intro__cta {
+  margin-top: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 700ms ease 0ms, transform 700ms ease 0ms;
+  position: relative;
+  z-index: 3;
+}
+.unit5-intro--cinematic .unit5-intro__cta.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.unit5-intro--cinematic .unit5-intro__cta-rule {
+  width: clamp(80px, 12vw, 180px);
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(196, 158, 102, 0.55) 50%,
+    transparent
+  );
+}
+
+.unit5-intro--cinematic .unit5-intro__cta-btn {
+  appearance: none;
+  background: rgba(20, 14, 6, 0.7);
+  border: 1px solid #6e5727;
+  color: #f4e0a8;
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 600;
+  font-variant: small-caps;
+  letter-spacing: 0.32em;
+  font-size: 14px;
+  padding: 14px 28px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+  animation: unit5IntroCtaPulse 2.4s ease-in-out infinite;
+}
+@keyframes unit5IntroCtaPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 195, 90, 0.0); border-color: #6e5727; }
+  50%      { box-shadow: 0 0 18px 0 rgba(255, 195, 90, 0.35); border-color: #c9a35a; }
+}
+.unit5-intro--cinematic .unit5-intro__cta-btn:hover {
+  background: rgba(40, 28, 12, 0.9);
+  border-color: #f4e0a8;
+  transform: translateY(-1px);
+  animation: none;
+}
+.unit5-intro--cinematic .unit5-intro__cta-btn:active {
+  transform: translateY(1px);
+}
+.unit5-intro--cinematic .unit5-intro__cta-bracket {
+  color: #c9a35a;
+  font-weight: 700;
+}
+.unit5-intro--cinematic .unit5-intro__cta-arrow {
+  color: #c9a35a;
+  font-weight: 700;
+  transform: translateY(2px);
+  display: inline-block;
+  animation: unit5IntroArrow 1.6s ease-in-out infinite;
+}
+@keyframes unit5IntroArrow {
+  0%, 100% { transform: translateY(2px); opacity: 0.7; }
+  50%      { transform: translateY(6px); opacity: 1; }
+}
+.unit5-intro--cinematic .unit5-intro__cta-meta {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  color: rgba(196, 158, 102, 0.5);
+}
+
+/* Footer museum tag */
+.unit5-intro--cinematic .unit5-intro__foot {
+  position: absolute;
+  left: 0; right: 0; bottom: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.34em;
+  color: rgba(196, 158, 102, 0.42);
+  z-index: 2;
+}
+.unit5-intro--cinematic .unit5-intro__foot-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(196, 158, 102, 0.45);
+}
+
+/* Ramp wipe — clip the black sheet from top to bottom */
+.unit5-intro--cinematic .unit5-intro__ramp {
+  background: #050302;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 900ms cubic-bezier(0.7, 0, 0.85, 0.15);
+}
+.unit5-intro--cinematic .unit5-intro__ramp.is-wiping {
+  clip-path: inset(0 0 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .unit5-intro--cinematic,
+  .unit5-intro--cinematic .unit5-intro__kicker,
+  .unit5-intro--cinematic .unit5-intro__sub,
+  .unit5-intro--cinematic .unit5-intro__cta,
+  .unit5-intro--cinematic .unit5-intro__cta-btn,
+  .unit5-intro--cinematic .unit5-intro__cta-arrow,
+  .unit5-intro--cinematic .unit5-intro__caret,
+  .unit5-intro--cinematic .unit5-intro__title-caret { animation: none; transition: none; }
+  .unit5-intro--cinematic .unit5-intro__ramp.is-wiping { transition: none; }
+}
+
+/* ============================================================
+   PART 5 — "THANK YOU" ARCANE CLOSING SCREEN
+   Hidden image + info panel; only a centered glyph + tagline
+   remains, carrying a quiet, otherworldly mood. Then the letters
+   diverge outward, the screen goes black, and an analog glitch
+   transition fires before the terminal stays dark.
+   ============================================================ */
+.unit5-stage.is-thanks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: clamp(12px, 1.6vh, 22px);
+  padding-block: clamp(20px, 4vh, 48px);
+}
+.unit5-stage.is-thanks .unit5-stage-frame,
+.unit5-stage.is-thanks .unit5-info-panel { display: none !important; }
+
+.unit5-thanks-wrap {
+  position: relative;
+  text-align: center;
+  z-index: 1;
+}
+
+/* Static ✦ above the word — kept for the calmer pre-divergence phase. */
+.unit5-stage.is-thanks::after {
+  content: '✦';
+  position: absolute;
+  top: 14%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(220, 200, 140, 0.22);
+  font-size: clamp(28px, 4vw, 56px);
+  letter-spacing: 0.4em;
+  filter: blur(0.3px);
+  pointer-events: none;
+  animation: unit5-thanks-pulse 4.2s ease-in-out infinite;
+}
+
+.unit5-thanks-text {
+  display: inline-flex;
+  gap: 0.05em;
+  color: rgba(245, 232, 200, 0.92);
+  font-family: 'Cinzel', 'Trajan Pro', 'Times New Roman', serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: clamp(28px, 4.2vw, 64px);
+  text-shadow:
+    0 0 14px rgba(220, 190, 120, 0.18),
+    0 0 32px rgba(120, 90, 50, 0.12);
+}
+.unit5-thanks-letter {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(4px);
+  letter-spacing: inherit;
+  transform: translate(0, 0) scale(1) rotate(0);
+  animation: unit5-letter-in 1.4s cubic-bezier(.2,.7,.2,1) calc(0.4s + var(--i) * 0.07s) forwards,
+             unit5-letter-out 1.0s cubic-bezier(.55,.05,.7,.4) 3.4s forwards;
+  will-change: transform, opacity, filter;
+}
+.unit5-thanks-sub {
+  display: block;
+  color: rgba(200, 180, 140, 0.55);
+  font-family: 'Cormorant Garamond', 'Cinzel', serif;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  font-size: clamp(10px, 1vw, 14px);
+  margin-top: clamp(8px, 1.4vh, 16px);
+  opacity: 0;
+  animation: unit5-sub-in 1.4s ease-out 0.9s forwards,
+             unit5-sub-out 0.5s ease-in 3.4s forwards;
+}
+
+/* --- keyframes --- */
+@keyframes unit5-letter-in {
+  0%   { opacity: 0; filter: blur(6px); transform: translate(0, 0) scale(0.85); letter-spacing: 0.5em; }
+  60%  { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; filter: blur(0); transform: translate(0, 0) scale(1); letter-spacing: 0.18em; }
+}
+@keyframes unit5-letter-out {
+  0%   { opacity: 1; filter: blur(0); transform: translate(0, 0) rotate(0); }
+  60%  { opacity: 0.6; filter: blur(1px); }
+  100% {
+    opacity: 0;
+    filter: blur(3px);
+    transform:
+      translate(calc(var(--dx) * 70vmin), calc(var(--dy) * 38vmin))
+      rotate(calc(var(--dx) * 18deg))
+      scale(1.4);
+  }
+}
+@keyframes unit5-sub-in {
+  from { opacity: 0; letter-spacing: 0.6em; filter: blur(4px); }
+  to   { opacity: 1; letter-spacing: 0.32em; filter: blur(0); }
+}
+@keyframes unit5-sub-out {
+  from { opacity: 0.55; }
+  to   { opacity: 0; }
+}
+@keyframes unit5-thanks-pulse {
+  0%, 100% { opacity: 0.55; transform: translateX(-50%) scale(1); }
+  50%      { opacity: 0.9;  transform: translateX(-50%) scale(1.08); }
+}
+
+/* ============================================================
+   BLACKOUT + ANALOG GLITCH
+   After the letters scatter the whole root fades to black, then
+   a brief analog-glitch tear fires (RGB split + scanline drop +
+   horizontal shake). After the glitch clears, everything stays
+   black — the terminal is "off".
+   ============================================================ */
+.unit5-root.is-thanks-active {
+  transition: background-color 0.6s ease;
+  background-color: #000;
+}
+.unit5-root.is-thanks-active .unit5-stage::after,
+.unit5-root.is-thanks-active .unit5-thanks-wrap,
+.unit5-root.is-thanks-active .unit5-title,
+.unit5-root.is-thanks-active .unit5-head,
+.unit5-root.is-thanks-active .unit5-nav,
+.unit5-root.is-thanks-active .unit5-crt,
+.unit5-root.is-thanks-active .unit5-crt--glow {
+  animation: unit5-vanish 0.6s ease 0s forwards;
+}
+@keyframes unit5-vanish {
+  to { opacity: 0; visibility: hidden; }
+}
+
+/* RGB tear overlay (renders on top of the whole root). */
+.unit5-thanks-glitch {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.04) 0,
+      rgba(255, 255, 255, 0.04) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+.unit5-thanks-glitch::before,
+.unit5-thanks-glitch::after {
+  content: '';
+  position: absolute;
+  inset: -4%;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(120, 80, 40, 0.18), transparent 60%),
+    linear-gradient(180deg, rgba(0,0,0,1), rgba(0,0,0,1));
+  mix-blend-mode: screen;
+}
+.unit5-thanks-glitch::before {
+  filter: hue-rotate(10deg) saturate(1.4);
+  animation: unit5-rgb-shift 0.18s steps(2, end) infinite;
+}
+.unit5-thanks-glitch::after {
+  background: linear-gradient(180deg, #000 0%, #000 100%);
+  animation: unit5-scan-drop 0.4s steps(3, end) infinite;
+}
+.unit5-root.is-thanks-glitch .unit5-thanks-glitch {
+  opacity: 1;
+  animation: unit5-glitch-on 0.2s steps(2, end) 3,
+             unit5-glitch-off 0.4s ease 0.6s forwards;
+}
+@keyframes unit5-glitch-on {
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(-6px, 2px); filter: hue-rotate(20deg); }
+  40%  { transform: translate(5px, -3px); filter: hue-rotate(-15deg); }
+  60%  { transform: translate(-3px, 1px); filter: contrast(1.4); }
+  80%  { transform: translate(4px, -1px); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes unit5-glitch-off {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes unit5-rgb-shift {
+  0%   { transform: translate(-3px, 0); }
+  50%  { transform: translate(4px, -2px); }
+  100% { transform: translate(-2px, 1px); }
+}
+@keyframes unit5-scan-drop {
+  0%   { clip-path: inset(0 0 0 0); }
+  33%  { clip-path: inset(40% 0 35% 0); }
+  66%  { clip-path: inset(70% 0 10% 0); }
+  100% { clip-path: inset(20% 0 60% 0); }
+}
+.unit5-root.is-thanks-glitch {
+  animation: unit5-root-shake 0.6s steps(8, end) 3;
+}
+@keyframes unit5-root-shake {
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(-2px, 1px); }
+  40%  { transform: translate(3px, -1px); }
+  60%  { transform: translate(-1px, 2px); }
+  80%  { transform: translate(2px, -2px); }
+  100% { transform: translate(0, 0); }
+}
+.unit5-root.is-thanks-glitch-off .unit5-thanks-glitch { display: none; }

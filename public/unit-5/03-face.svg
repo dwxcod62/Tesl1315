@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Close-up of a terracotta soldier's face and armour, sepia illustration">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a1108"/>
+      <stop offset="1" stop-color="#0a0805"/>
+    </linearGradient>
+    <linearGradient id="skin3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9a6f3e"/>
+      <stop offset="0.5" stop-color="#6f4d24"/>
+      <stop offset="1" stop-color="#3a2812"/>
+    </linearGradient>
+    <linearGradient id="armor3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a07a3e"/>
+      <stop offset="1" stop-color="#3a2812"/>
+    </linearGradient>
+    <radialGradient id="rim3" cx="0.5" cy="0.4" r="0.6">
+      <stop offset="0" stop-color="#d9a85a" stop-opacity="0.4"/>
+      <stop offset="0.6" stop-color="#9a6f30" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#bg3)"/>
+  <rect width="1600" height="1000" fill="url(#rim3)"/>
+
+  <!-- large terracotta head & shoulders, slightly off-centre right -->
+  <g transform="translate(560,180)">
+    <!-- shoulders / armour plate -->
+    <path d="M-60 540 Q0 480 60 540 L60 820 L-60 820 Z" fill="url(#armor3)"/>
+    <!-- armour plate lines -->
+    <line x1="-50" y1="600" x2="50" y2="600" stroke="#0a0805" stroke-width="2"/>
+    <line x1="-55" y1="640" x2="55" y2="640" stroke="#0a0805" stroke-width="2"/>
+    <line x1="-58" y1="680" x2="58" y2="680" stroke="#0a0805" stroke-width="2"/>
+    <!-- studs -->
+    <g fill="#0a0805">
+      <circle cx="-30" cy="620" r="4"/>
+      <circle cx="0"   cy="620" r="4"/>
+      <circle cx="30"  cy="620" r="4"/>
+      <circle cx="-30" cy="660" r="4"/>
+      <circle cx="0"   cy="660" r="4"/>
+      <circle cx="30"  cy="660" r="4"/>
+      <circle cx="-30" cy="700" r="4"/>
+      <circle cx="0"   cy="700" r="4"/>
+      <circle cx="30"  cy="700" r="4"/>
+    </g>
+    <!-- neck -->
+    <rect x="-40" y="420" width="80" height="100" fill="url(#skin3)"/>
+    <!-- head -->
+    <ellipse cx="0" cy="320" rx="140" ry="170" fill="url(#skin3)"/>
+    <!-- hairline / cap -->
+    <path d="M-140 300 Q0 140 140 300 L140 250 Q0 130 -140 250 Z" fill="#2a1d0d"/>
+    <!-- topknot / bun -->
+    <ellipse cx="0" cy="120" rx="40" ry="30" fill="#1a1108"/>
+    <path d="M-30 150 L-22 120 L-8 145 Z" fill="#1a1108"/>
+    <path d="M30 150 L22 120 L8 145 Z" fill="#1a1108"/>
+    <!-- brows -->
+    <path d="M-90 280 Q-55 260 -20 280" fill="none" stroke="#0a0805" stroke-width="5"/>
+    <path d="M20 280 Q55 260 90 280" fill="none" stroke="#0a0805" stroke-width="5"/>
+    <!-- eyes (almond) -->
+    <path d="M-85 320 Q-50 305 -15 320 Q-50 335 -85 320 Z" fill="#0a0805"/>
+    <path d="M15 320 Q50 305 85 320 Q50 335 15 320 Z" fill="#0a0805"/>
+    <!-- nose -->
+    <path d="M-8 340 Q0 380 10 400 L-10 400 Z" fill="#2a1d0d" opacity="0.6"/>
+    <!-- moustache -->
+    <path d="M-40 430 Q-10 415 0 420 Q10 415 40 430 Q20 445 0 442 Q-20 445 -40 430 Z" fill="#0a0805"/>
+    <!-- mouth -->
+    <line x1="-18" y1="455" x2="18" y2="455" stroke="#0a0805" stroke-width="3"/>
+    <!-- ear -->
+    <ellipse cx="-130" cy="320" rx="12" ry="22" fill="url(#skin3)"/>
+    <ellipse cx="130" cy="320" rx="12" ry="22" fill="url(#skin3)"/>
+  </g>
+
+  <!-- hair detail (decorative strands) -->
+  <g stroke="#0a0805" stroke-width="1.2" fill="none" opacity="0.8">
+    <path d="M520 380 Q500 420 510 460"/>
+    <path d="M540 360 Q525 410 540 460"/>
+    <path d="M560 350 Q555 410 565 460"/>
+    <path d="M580 350 Q580 420 580 470"/>
+  </g>
+
+  <!-- coords / label -->
+  <g font-family="Courier New, monospace" font-size="12" letter-spacing="2" fill="#c9a35a" fill-opacity="0.7">
+    <text x="40" y="40">PIT 1 · FIG. 03 · DETAIL</text>
+    <text x="40" y="60">SCALE 1 : 1 (CLOSE-UP)</text>
+  </g>
+  <g font-family="Courier New, monospace" font-size="11" letter-spacing="2" fill="#c9a35a" fill-opacity="0.7">
+    <text x="1320" y="940">LIFE-SIZE · h ≈ 1.85 m</text>
+  </g>
+
+  <!-- corner crosshairs -->
+  <g stroke="#c9a35a" stroke-width="0.8" fill="none" stroke-opacity="0.5">
+    <line x1="40" y1="200" x2="100" y2="200"/>
+    <line x1="70" y1="170" x2="70" y2="230"/>
+    <line x1="1500" y1="200" x2="1560" y2="200"/>
+    <line x1="1530" y1="170" x2="1530" y2="230"/>
+    <line x1="40" y1="800" x2="100" y2="800"/>
+    <line x1="70" y1="770" x2="70" y2="830"/>
+  </g>
+</svg>

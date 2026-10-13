@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="The unopened burial mound of Qin Shi Huang under a stormy sky, sepia illustration">
+  <defs>
+    <linearGradient id="sky4" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a0805"/>
+      <stop offset="0.4" stop-color="#1a0e06"/>
+      <stop offset="1" stop-color="#3a2812"/>
+    </linearGradient>
+    <linearGradient id="mound4" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a1d0d"/>
+      <stop offset="1" stop-color="#0a0805"/>
+    </linearGradient>
+    <radialGradient id="moon4" cx="0.78" cy="0.22" r="0.08">
+      <stop offset="0" stop-color="#d9a85a" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#9a6f30" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow4" cx="0.5" cy="0.65" r="0.6">
+      <stop offset="0" stop-color="#c9a35a" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="hatch4" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(20)">
+      <line x1="0" y1="0" x2="0" y2="14" stroke="#c9a35a" stroke-width="0.4" stroke-opacity="0.1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#sky4)"/>
+  <rect width="1600" height="1000" fill="url(#glow4)"/>
+
+  <!-- moon -->
+  <circle cx="1248" cy="220" r="40" fill="#d9a85a" opacity="0.85"/>
+  <rect width="1600" height="1000" fill="url(#moon4)"/>
+
+  <!-- mist / clouds -->
+  <g fill="#1a0e06" opacity="0.65">
+    <ellipse cx="200" cy="200" rx="220" ry="40"/>
+    <ellipse cx="500" cy="280" rx="280" ry="40"/>
+    <ellipse cx="900" cy="180" rx="240" ry="36"/>
+    <ellipse cx="1300" cy="320" rx="260" ry="42"/>
+  </g>
+
+  <!-- distant horizon -->
+  <path d="M0 700 L1600 700 L1600 1000 L0 1000 Z" fill="url(#mound4)"/>
+  <path d="M0 700 L1600 700 L1600 1000 L0 1000 Z" fill="url(#hatch4)"/>
+
+  <!-- the unopened tomb: a great dark pyramid -->
+  <path d="M260 700 Q800 360 1340 700 L1340 720 L260 720 Z" fill="#0a0805"/>
+  <path d="M260 700 Q800 360 1340 700" fill="none" stroke="#c9a35a" stroke-width="1.2" stroke-opacity="0.55"/>
+  <!-- inner darker pyramid shape -->
+  <path d="M380 700 Q800 460 1220 700" fill="none" stroke="#c9a35a" stroke-width="0.5" stroke-opacity="0.3"/>
+  <path d="M500 700 Q800 540 1100 700" fill="none" stroke="#c9a35a" stroke-width="0.5" stroke-opacity="0.25"/>
+  <path d="M620 700 Q800 600 980 700"  fill="none" stroke="#c9a35a" stroke-width="0.5" stroke-opacity="0.2"/>
+
+  <!-- faint glow line at peak (mercury river hint) -->
+  <path d="M780 380 Q800 360 820 380 Q810 410 800 420 Q790 410 780 380 Z" fill="#c9a35a" opacity="0.45"/>
+  <path d="M780 410 Q800 720 820 410" fill="none" stroke="#c9a35a" stroke-width="0.5" stroke-opacity="0.15"/>
+
+  <!-- small lightning / sparks for cinematic effect -->
+  <g stroke="#c9a35a" stroke-width="0.6" stroke-opacity="0.5">
+    <line x1="300" y1="180" x2="320" y2="240"/>
+    <line x1="320" y1="240" x2="305" y2="290"/>
+    <line x1="1100" y1="120" x2="1120" y2="170"/>
+    <line x1="1120" y1="170" x2="1100" y2="220"/>
+  </g>
+
+  <!-- sealed sign / barrier -->
+  <g transform="translate(750,640)">
+    <line x1="0" y1="0" x2="100" y2="0" stroke="#c9a35a" stroke-width="1" stroke-opacity="0.7"/>
+    <line x1="0" y1="6" x2="100" y2="6" stroke="#c9a35a" stroke-width="0.5" stroke-opacity="0.4"/>
+    <text x="0" y="-6" font-family="Courier New, monospace" font-size="11" letter-spacing="3" fill="#c9a35a" fill-opacity="0.85">UNOPENED · SEALED</text>
+  </g>
+
+  <!-- coords -->
+  <g font-family="Courier New, monospace" font-size="12" letter-spacing="2" fill="#c9a35a" fill-opacity="0.6">
+    <text x="40" y="40">N 34°26′  E 109°15′ · BURIAL MOUND</text>
+    <text x="40" y="60">CLASSIFIED · NO EXCAVATION SINCE 1974</text>
+  </g>
+  <g font-family="Courier New, monospace" font-size="11" letter-spacing="2" fill="#c9a35a" fill-opacity="0.6">
+    <text x="1320" y="940">Hg DETECTED · UNVERIFIED</text>
+  </g>
+</svg>

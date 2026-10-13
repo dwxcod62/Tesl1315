@@ -1,0 +1,483 @@
+/* ================================================================
+   UNIT 5 — Cinematic Earth-to-Mausoleum zoom intro
+   A full-bleed Cesium globe with a refined overlay (title, CTA,
+   skip/replay controls and a final destination info panel).
+   ================================================================ */
+
+.ez-root {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: #03040a;
+  overflow: hidden;
+  font-family: 'Cinzel', 'IM Fell English SC', Georgia, serif;
+  color: #f4e8d2;
+  isolation: isolate;
+}
+
+/* ---------- Globe host ---------- */
+.ez-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 0;
+}
+
+/* Hide Cesium's default credit / nav widgets cleanly while keeping
+   the credit reachable for screen-readers. */
+.ez-canvas .cesium-viewer-bottom,
+.ez-canvas .cesium-navigation-help,
+.ez-canvas .cesium-toolbar-button,
+.ez-canvas .cesium-viewer-toolbar,
+.ez-canvas .cesium-viewer-fullscreenContainer,
+.ez-canvas .cesium-viewer-vrContainer {
+  display: none !important;
+}
+
+/* ---------- Space ambience (stars + nebula) ---------- */
+.ez-stars,
+.ez-nebula {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.ez-stars {
+  background:
+    radial-gradient(1px 1px at 20% 30%,  rgba(255,255,255,0.85), transparent 60%),
+    radial-gradient(1px 1px at 70% 65%,  rgba(255,255,255,0.6),  transparent 60%),
+    radial-gradient(1.2px 1.2px at 40% 80%, rgba(255,240,210,0.7), transparent 60%),
+    radial-gradient(1px 1px at 85% 20%,  rgba(255,255,255,0.55), transparent 60%),
+    radial-gradient(1px 1px at 10% 70%,  rgba(255,255,255,0.45), transparent 60%),
+    radial-gradient(1.4px 1.4px at 60% 12%, rgba(220,235,255,0.7), transparent 60%),
+    radial-gradient(1px 1px at 92% 88%,  rgba(255,255,255,0.5),  transparent 60%),
+    radial-gradient(1px 1px at 30% 50%,  rgba(255,255,255,0.4),  transparent 60%),
+    radial-gradient(1.2px 1.2px at 5% 15%, rgba(255,255,255,0.55), transparent 60%),
+    radial-gradient(1px 1px at 50% 35%,  rgba(255,255,255,0.4),  transparent 60%);
+  background-size: 100% 100%;
+  opacity: 0;
+  transition: opacity 1400ms ease;
+}
+.ez-root.is-loaded .ez-stars { opacity: 0.9; }
+
+.ez-nebula {
+  background:
+    radial-gradient(ellipse 60% 40% at 25% 30%, rgba(72, 38, 110, 0.55) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 35% at 80% 70%, rgba(20, 60, 120, 0.45) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 25% at 60% 20%, rgba(140, 70, 50, 0.25) 0%, transparent 70%);
+  filter: blur(6px);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 2000ms ease;
+}
+.ez-root.is-loaded .ez-nebula { opacity: 1; }
+
+/* Vignette so the title and panel read against the globe */
+.ez-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.55) 80%, rgba(0,0,0,0.85) 100%),
+    linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 22%, transparent 78%, rgba(0,0,0,0.6) 100%);
+}
+
+/* ---------- Headline (intro) ---------- */
+.ez-headline {
+  position: absolute;
+  left: 50%;
+  top: 18%;
+  transform: translateX(-50%);
+  z-index: 4;
+  text-align: center;
+  pointer-events: none;
+  width: min(720px, 90vw);
+}
+
+.ez-kicker {
+  font-family: ui-monospace, 'JetBrains Mono', Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  color: rgba(244, 232, 210, 0.7);
+  margin: 0 0 16px;
+  text-transform: uppercase;
+}
+
+.ez-title {
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-weight: 600;
+  font-variant: small-caps;
+  font-size: clamp(32px, 5vw, 64px);
+  letter-spacing: 0.18em;
+  margin: 0;
+  line-height: 1.05;
+  color: #f7e9c8;
+  text-shadow:
+    0 0 22px rgba(255, 200, 120, 0.18),
+    2px 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+.ez-title em {
+  display: block;
+  font-style: italic;
+  font-size: 0.55em;
+  letter-spacing: 0.32em;
+  margin-top: 14px;
+  color: #e8c98a;
+}
+
+.ez-sub {
+  margin: 22px auto 0;
+  max-width: 540px;
+  font-family: 'IM Fell English SC', Georgia, serif;
+  font-style: italic;
+  font-size: clamp(13px, 1.1vw, 16px);
+  letter-spacing: 0.06em;
+  line-height: 1.55;
+  color: rgba(244, 232, 210, 0.78);
+}
+
+/* ---------- CTA ---------- */
+.ez-cta {
+  position: absolute;
+  left: 50%;
+  top: 62%;
+  transform: translateX(-50%);
+  z-index: 5;
+  appearance: none;
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 600;
+  font-variant: small-caps;
+  letter-spacing: 0.34em;
+  font-size: 13px;
+  padding: 16px 36px;
+  color: #f7e9c8;
+  background: rgba(8, 6, 18, 0.65);
+  border: 1px solid rgba(244, 232, 210, 0.5);
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ez-cta::before,
+.ez-cta::after {
+  content: '';
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+.ez-cta:hover,
+.ez-cta:focus-visible {
+  background: rgba(244, 232, 210, 0.12);
+  border-color: #f7e9c8;
+  color: #fff;
+  box-shadow: 0 0 0 6px rgba(244, 232, 210, 0.05), 0 0 22px rgba(255, 200, 120, 0.2);
+  outline: none;
+}
+
+.ez-cta:active { transform: translateX(-50%) translateY(1px); }
+
+.ez-cta-hint {
+  position: absolute;
+  left: 50%;
+  top: calc(62% + 64px);
+  transform: translateX(-50%);
+  z-index: 4;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.34em;
+  color: rgba(244, 232, 210, 0.55);
+  pointer-events: none;
+  text-transform: uppercase;
+}
+
+/* ---------- Skip / Replay buttons ---------- */
+.ez-controls {
+  position: absolute;
+  z-index: 6;
+  display: flex;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.ez-controls--top-right {
+  top: clamp(14px, 2.2vh, 24px);
+  right: clamp(14px, 2.2vw, 24px);
+}
+
+.ez-controls--bottom-right {
+  bottom: clamp(14px, 2.2vh, 24px);
+  right: clamp(14px, 2.2vw, 24px);
+}
+
+.ez-btn {
+  appearance: none;
+  font-family: ui-monospace, 'JetBrains Mono', Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  color: rgba(244, 232, 210, 0.85);
+  background: rgba(8, 6, 18, 0.55);
+  border: 1px solid rgba(244, 232, 210, 0.35);
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ez-btn:hover,
+.ez-btn:focus-visible {
+  background: rgba(244, 232, 210, 0.1);
+  border-color: #f7e9c8;
+  color: #fff;
+  outline: none;
+}
+
+.ez-btn:active { transform: translateY(1px); }
+
+.ez-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ez-btn .ez-btn__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c9a35a;
+  box-shadow: 0 0 8px rgba(201, 163, 90, 0.8);
+}
+
+/* ---------- Loading screen ---------- */
+.ez-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(ellipse at center, #0c0a1a 0%, #03040a 70%);
+  transition: opacity 700ms ease, visibility 700ms ease;
+}
+
+.ez-loader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.ez-loader__inner {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.ez-loader__globe {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255,255,255,0.15), transparent 55%),
+    radial-gradient(circle at 50% 50%, #2b3a6e 0%, #0d1430 70%, #03040a 100%);
+  box-shadow: 0 0 28px rgba(80, 120, 220, 0.35), inset 0 0 18px rgba(0,0,0,0.5);
+  animation: ez-loader-spin 2.4s linear infinite;
+  position: relative;
+}
+.ez-loader__globe::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(244, 232, 210, 0.25);
+  border-top-color: rgba(244, 232, 210, 0.7);
+  border-right-color: transparent;
+  animation: ez-loader-spin 1.6s linear infinite reverse;
+}
+
+@keyframes ez-loader-spin {
+  to { transform: rotate(360deg); }
+}
+
+.ez-loader__label {
+  font-family: ui-monospace, 'JetBrains Mono', Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  color: rgba(244, 232, 210, 0.7);
+  text-transform: uppercase;
+}
+
+.ez-loader__sub {
+  font-family: 'IM Fell English SC', Georgia, serif;
+  font-style: italic;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: rgba(244, 232, 210, 0.4);
+}
+
+/* ---------- Error state ---------- */
+.ez-error {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(ellipse at center, #1a0e0e 0%, #050203 80%);
+  text-align: center;
+  padding: 24px;
+}
+
+.ez-error__panel {
+  max-width: 460px;
+  border: 1px solid rgba(255, 90, 90, 0.35);
+  background: rgba(20, 8, 10, 0.7);
+  padding: 24px 28px;
+}
+
+.ez-error__title {
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 600;
+  font-variant: small-caps;
+  letter-spacing: 0.24em;
+  font-size: 18px;
+  color: #ff9a8a;
+  margin: 0 0 12px;
+}
+
+.ez-error__body {
+  font-family: 'IM Fell English SC', Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(244, 232, 210, 0.75);
+  margin: 0 0 18px;
+}
+
+/* ---------- Destination info panel ---------- */
+.ez-panel {
+  position: absolute;
+  left: clamp(16px, 4vw, 56px);
+  bottom: clamp(90px, 14vh, 130px);
+  z-index: 5;
+  width: min(440px, calc(100vw - 32px));
+  padding: 22px 24px;
+  background: rgba(8, 6, 18, 0.72);
+  border: 1px solid rgba(244, 232, 210, 0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  font-family: 'IM Fell English SC', Georgia, serif;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 800ms ease 200ms, transform 800ms ease 200ms;
+}
+
+.ez-panel.is-shown {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ez-panel__eyebrow {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: #c9a35a;
+  margin: 0 0 10px;
+}
+
+.ez-panel__title {
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 700;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  font-size: clamp(20px, 2vw, 26px);
+  line-height: 1.2;
+  margin: 0 0 8px;
+  color: #f7e9c8;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
+}
+
+.ez-panel__sub {
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: rgba(244, 232, 210, 0.78);
+  margin: 0 0 14px;
+}
+
+.ez-panel__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(244, 232, 210, 0.55);
+  padding-top: 12px;
+  border-top: 1px dashed rgba(244, 232, 210, 0.18);
+}
+
+.ez-panel__meta span strong {
+  color: #e8c98a;
+  font-weight: 600;
+  margin-left: 6px;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .ez-stars,
+  .ez-nebula,
+  .ez-panel,
+  .ez-cta,
+  .ez-btn,
+  .ez-loader,
+  .ez-loader__globe,
+  .ez-loader__globe::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ---------- Responsive squeeze ---------- */
+@media (max-width: 640px) {
+  .ez-headline { top: 14%; }
+  .ez-cta { padding: 14px 26px; font-size: 12px; letter-spacing: 0.26em; }
+  .ez-cta-hint { top: calc(62% + 58px); }
+  .ez-panel {
+    left: 12px;
+    right: 12px;
+    width: auto;
+    bottom: 80px;
+    padding: 18px 18px;
+  }
+  .ez-controls--top-right,
+  .ez-controls--bottom-right {
+    top: 12px;
+    right: 12px;
+  }
+  .ez-controls--bottom-right { top: auto; bottom: 12px; }
+  .ez-btn { padding: 8px 12px; font-size: 9px; letter-spacing: 0.24em; }
+}
+
+@media (max-height: 540px) {
+  .ez-headline { top: 10%; }
+  .ez-title { font-size: 28px; }
+  .ez-sub { margin-top: 14px; }
+  .ez-cta { top: 58%; }
+  .ez-panel { bottom: 70px; }
+}

@@ -8,6 +8,21 @@ export default function PartIcon({ kind = 'compass', size = 38 }) {
     'aria-hidden': true,
   };
   switch (kind) {
+    case 'pin':
+      return (
+        <svg {...common}>
+          <rect x="6" y="1" width="4" height="5" fill="#c9a35a" />
+          <rect x="5" y="3" width="1" height="1" fill="#1a1006" />
+          <rect x="10" y="3" width="1" height="1" fill="#1a1006" />
+          <rect x="6" y="6" width="4" height="2" fill="#c9a35a" />
+          <rect x="5" y="8" width="1" height="2" fill="#c9a35a" />
+          <rect x="10" y="8" width="1" height="2" fill="#c9a35a" />
+          <rect x="6" y="9" width="4" height="2" fill="#c9a35a" />
+          <rect x="7" y="11" width="2" height="2" fill="#c9a35a" />
+          <rect x="6" y="13" width="4" height="2" fill="#c9a35a" />
+          <rect x="4" y="14" width="8" height="1" fill="#1a1006" />
+        </svg>
+      );
     case 'compass':
       return (
         <svg {...common}>
