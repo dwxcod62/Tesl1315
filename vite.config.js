@@ -73,15 +73,56 @@ export default defineConfig({
         }
         return null
       },
-      // Convert `module.exports = X` in legacy node_modules CJS
-      // files into `export default X` so `import X from "pkg"`
-      // resolves at runtime. This covers `mersenne-twister`,
-      // `urijs`, `bitmap-sdf`, `grapheme-splitter`, `rbush`, etc.
-      // We match on the CJS pattern rather than a path whitelist
-      // so the shim covers every legacy dep Cesium pulls in.
+      // Convert `module.exports = X` in legacy CJS dependencies
+      // (Cesium's transitive deps: mersenne-twister, urijs,
+      // bitmap-sdf, grapheme-splitter, rbush, autolinker,
+      // topojson-client, draco3d, meshoptimizer, etc.) into
+      // `export default X` so `import X from "pkg"` resolves at
+      // runtime.
+      //
+      // SCOPE: only apply to packages listed in
+      // `optimizeDeps.exclude` below. These are the Cesium deps
+      // that Vite deliberately lets the browser load directly
+      // from `node_modules` (the pre-bundler chokes on them), so
+      // they're the only ones that need rewriting.
+      //
+      // CRITICAL: do NOT broaden this to `react`, `react-dom`,
+      // `react-dom/client`, `scheduler`, `react/jsx-runtime`, or
+      // `react/jsx-dev-runtime`. Their `index.js` is the same
+      // CJS shim pattern, but they ARE pre-bundled via
+      // `optimizeDeps.include` and Rolldown wraps them correctly.
+      // Stripping/rewriting their CJS lines breaks tree-shaking
+      // and surfaces MISSING_EXPORT errors at build time.
+      //
+      // CRITICAL #2: do NOT strip `module.exports = X` from the
+      // source. The browser has no `module` global, so if any
+      // Cesium CJS file is mistakenly loaded without this shim
+      // (e.g. through a side import we don't catch), stripping
+      // silently masks a real `module is not defined` error. By
+      // keeping the original line and *appending* `export default
+      // X` we let Vite's bundler see the default export while
+      // preserving the line that was actually breaking.
       transform(code, id) {
         if (!id.includes('node_modules')) return null
         if (id.includes('node_modules/.vite')) return null
+        // Only transform files inside Cesium CJS deps.
+        const CESIUM_CJS_DEPS = [
+          'mersenne-twister',
+          'urijs',
+          'autolinker',
+          'bitmap-sdf',
+          'draco3d',
+          'meshoptimizer',
+          'topojson-client',
+          'rbush',
+          'grapheme-splitter',
+        ]
+        const matched = CESIUM_CJS_DEPS.some(
+          (dep) =>
+            id.includes(`node_modules/${dep}/`) ||
+            id.includes(`node_modules\\${dep}\\`)
+        )
+        if (!matched) return null
         if (!/module\.exports\s*=\s*[A-Za-z_$]/.test(code)) return null
         if (/export\s+default/.test(code)) return null
         const m = code.match(/module\.exports\s*=\s*([A-Za-z_$][\w$]*)/)
@@ -117,11 +158,10 @@ export default defineConfig({
       'rbush',
       'grapheme-splitter',
     ],
-    esbuildOptions: {
-      // Force Cesium's pure-ESM `index.js` files to be treated as ESM
-      // by esbuild. Their package.json lacks `"type": "module"`, so
-      // without this flag esbuild bundles them as CJS and drops all
-      // named exports (e.g. `buildDrawCommand`).
+    // Vite 8 / Rolldown use `rolldownOptions`, not `esbuildOptions`.
+    // Forcing Cesium's pure-ESM `index.js` to be treated as ESM
+    // (their package.json lacks `"type": "module"`).
+    rolldownOptions: {
       mainFields: ['module', 'main'],
       conditions: ['module', 'browser', 'import', 'default'],
     },
